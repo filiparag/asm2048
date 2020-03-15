@@ -8,7 +8,7 @@
 #define INIT_CELL_MAX 5
 
 typedef enum {
-  INITIAL, PLAYING, LOST
+  LOST, PLAYING
 } game_state;
 
 typedef enum {
@@ -42,21 +42,21 @@ void board_print(game_board board) {
   }
 }
 
-dim index_first(direction dir, dim border) {
+dim inline index_first(direction dir, dim border) {
   if (dir == UP || dir == LEFT)
     return 0;
   else
     return BOARD_DIM - border;
 }
 
-dim index_last(direction dir, dim border) {
+dim inline index_last(direction dir, dim border) {
   if (dir == UP || dir == LEFT)
     return BOARD_DIM - border;
   else
     return 0;
 }
 
-__int8_t index_next(direction dir) {
+__int8_t inline index_next(direction dir) {
   if (dir == UP || dir == LEFT)
     return 1;
   else
@@ -150,10 +150,20 @@ bool board_insert(game_board board) {
     return false;
 }
 
+void board_clear(game_board board) {
+  for (dim r = 0; r < BOARD_DIM; ++r)
+    for (dim c = 0; c < BOARD_DIM; ++c)
+      board[r][c] = 0;
+}
+
 void game_initialize(game_store *game) {
+  if (game->state == PLAYING)
+    return;
+  board_clear(game->board);
   const dim count = random_cell(INIT_CELL_MAX) + 1;
   for (dim c = 0; c < count; ++c)
     board_insert(game->board);
+  game->score = 0;
   game->state = PLAYING;
 }
 
@@ -176,14 +186,16 @@ void game_action(game_store *game, direction dir) {
 
 int main2048() {
   srand(time(NULL));
-  game_store game = {INITIAL};
+  game_store game = {LOST};
   game_initialize(&game);
-  char input;
-  while (game.state != LOST) {
+  while (true) {
     printf("\x1B[1;1H\x1B[2J");
     printf("Score: %9i\n\n", game.score);
     board_print(game.board);
+    if (game.state == LOST)
+      printf("\nYou lost!\n");
     printf("\n:");
+    char input;
     scanf("%c", &input);
     switch (input) {
       case 'q':
@@ -202,6 +214,10 @@ int main2048() {
       }
       case 'r': {
         game_action(&game, RIGHT);
+        break;
+      }
+      case 'n': {
+        game_initialize(&game);
         break;
       }
       default:

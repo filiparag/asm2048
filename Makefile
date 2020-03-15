@@ -1,6 +1,6 @@
 CC?=gcc
 SDL2FLAGS=$(shell pkg-config sdl2 --cflags --libs)
-CFLAGS?=-std=c18 -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow -Wno-unused-variable
+CFLAGS?=-std=c18 -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow
 
 .PHONY: all msg clean fullclean
 
