@@ -8,7 +8,7 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${fileDirname}/${fileBasenameNoExtension}.o",
+      "program": "${fileDirname}/main.o",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
