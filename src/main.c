@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 		"2048",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		512,
-		512,
+		BOARD_SIZE,
+		BOARD_SIZE + HEADER_SIZE,
 		SDL_WINDOW_SHOWN
 	);
 	if (win == NULL) {
@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 
 	while (!quit) {
 		while( SDL_PollEvent( &event ) ){
-      SDL_SetRenderDrawColor(ren, 187,173,160, 255);
 			SDL_RenderClear(ren);
 			switch( event.type ){
 				case SDL_KEYDOWN:
@@ -81,6 +80,9 @@ int main(int argc, char *argv[])
 						case SDLK_d:
 							game.board[0][0] *= 2;
 							break;
+						case SDLK_f:
+							board_insert(game.board);
+							break;
 						default:
 								break;
 				}
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
 				default:
 						break;
 			}
+			draw_header(ren, game.state, game.score);
 			draw_board(ren, game.board);
 			SDL_RenderPresent(ren);
 			SDL_Delay(1);
