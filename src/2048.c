@@ -1,37 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-
-#define BOARD_DIM 4
-#define RND_POW_MAX 2
-#define INIT_CELL_MAX 5
-
-typedef enum {
-  LOST, PLAYING
-} game_state;
-
-typedef enum {
-  UP, DOWN, LEFT, RIGHT
-} direction;
-
-typedef enum {
-  ROW, COLUMN
-} axis;
-
-typedef __uint16_t val;
-typedef __uint8_t dim;
-
-typedef val game_board[BOARD_DIM][BOARD_DIM];
-
-typedef struct {
-  dim row, col;
-} board_cell;
-typedef struct {
-  game_state state;
-  game_board board;
-  val score;
-} game_store;
+#ifndef HEADER_LOGIC
+  #define HEADER_LOGIC
+  #include "2048.h"
+#endif
 
 void board_print(game_board board) {
   for (dim r = 0; r < BOARD_DIM; ++r) {
@@ -93,7 +63,8 @@ val columns_add(game_board board, direction dir) {
   return score;
 }
 
-void rows_move(game_board board, direction dir) {
+bool rows_move(game_board board, direction dir) {
+  bool moved = false;
   dim border = (dir == UP) ? 0 : 1;
   const dim first = index_first(dir, border);
   const dim last = index_last(dir, 0);
@@ -102,14 +73,19 @@ void rows_move(game_board board, direction dir) {
     for (dim r = first; r != last; r += next) {
       __int8_t r_next = r + next;
       while (board[r][c] == 0 && r_next + border != last) {
-        board[r][c] = board[r_next][c];
-        board[r_next][c] = 0;
+        if (board[r_next][c] != 0) {
+          board[r][c] = board[r_next][c];
+          board[r_next][c] = 0;
+          moved = true;
+        }
         r_next += next;
       }
     }
+  return moved;
 }
 
-void columns_move(game_board board, direction dir) {
+bool columns_move(game_board board, direction dir) {
+  bool moved = false;
   dim border = (dir == LEFT) ? 0 : 1;
   const dim first = index_first(dir, border);
   const dim last = index_last(dir, 0);
@@ -118,11 +94,15 @@ void columns_move(game_board board, direction dir) {
     for (dim c = first; c != last; c += next) {
       __int8_t c_next = c + next;
       while (board[r][c] == 0 && c_next + border != last) {
-        board[r][c] = board[r][c_next];
-        board[r][c_next] = 0;
+        if (board[r][c_next] != 0) {
+          board[r][c] = board[r][c_next];
+          board[r][c_next] = 0;
+          moved = true;
+        }
         c_next += next;
       }
     }
+  return moved;
 }
 
 val inline random_value() {
@@ -170,18 +150,18 @@ void game_initialize(game_store *game) {
 void game_action(game_store *game, direction dir) {
   if (game->state != PLAYING)
     return;
+  bool moved = false;
   if (dir == LEFT || dir == RIGHT) {
-    columns_move(game->board, dir);
+    moved |= columns_move(game->board, dir);
     game->score += columns_add(game->board, dir);
-    columns_move(game->board, dir);
+    moved |= columns_move(game->board, dir);
   } else {
-    rows_move(game->board, dir);
+    moved |= rows_move(game->board, dir);
     game->score += rows_add(game->board, dir);
-    rows_move(game->board, dir);
+    moved |= rows_move(game->board, dir);
   }
-  if (!board_insert(game->board)) {
+  if (moved && !board_insert(game->board))
     game->state = LOST;
-  }
 }
 
 int main2048() {

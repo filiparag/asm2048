@@ -8,7 +8,9 @@
       "label": "Make",
       "command": "/usr/bin/make",
       "args": ["debug"],
-      "options": {},
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
       "problemMatcher": [
         "$gcc"
       ],
