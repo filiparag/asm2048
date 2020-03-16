@@ -148,8 +148,8 @@ void game_initialize(game_store *game) {
 }
 
 void game_action(game_store *game, direction dir) {
-  if (game->state != PLAYING)
-    return;
+  // if (game->state != PLAYING)
+  //   return;
   bool moved = false;
   if (dir == LEFT || dir == RIGHT) {
     moved |= columns_move(game->board, dir);
@@ -160,16 +160,20 @@ void game_action(game_store *game, direction dir) {
     game->score += rows_add(game->board, dir);
     moved |= rows_move(game->board, dir);
   }
-  if (!moved && !board_insert(game->board)) {
-    game_board hyp_move_board;
-    for (dim r = 0; r < BOARD_DIM; ++r)
-      for (dim c = 0; c < BOARD_DIM; ++c)
-        hyp_move_board[r][c] = game->board[r][c];
-    for (direction hyp_dir = 0; hyp_dir < 4; ++hyp_dir)
-      if (columns_add(hyp_move_board, hyp_dir) > 0)
-        return;
-    game->state = LOST;
-  }
+  if (!board_insert(game->board))
+    if (!moved) {
+      game_board hyp_move_board;
+      for (dim r = 0; r < BOARD_DIM; ++r)
+        for (dim c = 0; c < BOARD_DIM; ++c)
+          hyp_move_board[r][c] = game->board[r][c];
+      if (
+        columns_add(hyp_move_board, LEFT) == 0 &&
+        columns_add(hyp_move_board, RIGHT) == 0 &&
+        rows_add(hyp_move_board, UP) == 0 &&
+        rows_add(hyp_move_board, DOWN) == 0
+      )
+        game->state = LOST;
+    }
 }
 
 int main2048() {

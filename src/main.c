@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 
+	font_close();
 	atexit(TTF_Quit);
 
 	return 0;
