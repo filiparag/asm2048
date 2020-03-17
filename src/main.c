@@ -56,7 +56,15 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	bool quit = false;
 	bool mouse_down = false;
+	Uint64 last_frame;
+	Uint64 current_frame = SDL_GetPerformanceCounter();
+	double delta_millis;
 	render_state r_state = INTERACTIVE;
+
+	game_board old_board;
+	for (dim r = 0; r < BOARD_DIM; ++r)
+				for (dim c = 0; c < BOARD_DIM; ++c)
+					old_board[r][c] = 0;
 
 	while (!quit) {
 		int mouse_x, mouse_y;
@@ -86,7 +94,7 @@ int main(int argc, char *argv[])
 							game.board[0][0] *= 2;
 							break;
 						case SDLK_f:
-							board_insert(game.board);
+							board_insert(game.board, &game.delta);
 							break;
 						default:
 								break;
@@ -112,10 +120,19 @@ int main(int argc, char *argv[])
 			button_handle_clicks(&game);
 		SDL_RenderClear(ren);
 		draw_header(ren, game.state, game.score);
-		if (!animate_board(ren, game.board, game.shift))
-			draw_board(ren, game.board);
-		SDL_GetMouseState(&mouse_x, &mouse_y);
+		draw_board(ren);
 		draw_buttons(ren, mouse_x, mouse_y, mouse_down);
+		last_frame = current_frame;
+		current_frame = SDL_GetPerformanceCounter();
+		delta_millis = (double)((current_frame - last_frame)*1000 /
+									 (double)SDL_GetPerformanceFrequency());
+		if (!animate_board(ren, delta_millis, game.board, old_board, &game.delta)) {
+			draw_cells(ren, game.board, 1);
+			for (dim r = 0; r < BOARD_DIM; ++r)
+				for (dim c = 0; c < BOARD_DIM; ++c)
+					old_board[r][c] = game.board[r][c];
+		}
+		SDL_GetMouseState(&mouse_x, &mouse_y);
 		SDL_RenderPresent(ren);
 	}
 

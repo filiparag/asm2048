@@ -29,21 +29,24 @@ typedef val game_board[BOARD_DIM][BOARD_DIM];
 
 typedef struct {
   dim row, col;
+  val value;
 } board_cell;
 
 typedef struct {
-  val value;
-  dim f_row, f_col, t_row, t_col;
-} cell_shift;
+  board_cell orig;
+  board_cell dest;
+} board_cell_pair;
 
 typedef struct {
-  cell_shift cells [2 * BOARD_DIM * BOARD_DIM];
-  dim length;
-} board_shift;
+  board_cell_pair move [2 * BOARD_DIM * BOARD_DIM];
+  board_cell_pair add [2 * BOARD_DIM * BOARD_DIM];
+  board_cell insert [2 * BOARD_DIM * BOARD_DIM];
+  dim move_len, add_len, insert_len;
+} board_change;
 
 typedef struct {
   game_state state;
   game_board board;
   val score;
-  board_shift shift;
+  board_change delta;
 } game_store;

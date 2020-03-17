@@ -56,6 +56,14 @@ void color_add(SDL_Color* base, const SDL_Color delta) {
     base->a = UINT8_MAX;
 }
 
+void dim_to_pos(const dim row, const dim col,
+                pos* x, pos* y) {
+  *x = BOARD_PADDING + 
+    (BOARD_PADDING + CELL_SIZE) * col;
+  *y = HEADER_SIZE + BOARD_PADDING + 
+    (BOARD_PADDING + CELL_SIZE) * row;
+}
+
 void color_sub(SDL_Color* base, const SDL_Color delta) {
   if (base->r - delta.r >= 0)
     base->r -= delta.r;
@@ -178,40 +186,63 @@ void draw_button(SDL_Renderer *ren,
 }
 
 void draw_cell_text(SDL_Renderer *ren, const char text[],
-                    const pos x, const pos y,
-                    const SDL_Color bg) {
+                    const pos x, const pos y, const pos size,
+                    const pos padding, const SDL_Color bg) {
   SDL_Color fg;
   color_foreground(bg, &fg);
   draw_text(
-    ren, text, x + CELL_PADDING, y + CELL_PADDING,
-    CELL_SIZE - 2 * CELL_PADDING,
-    CELL_SIZE - 2 * CELL_PADDING,
+    ren, text, x + padding, y + padding,
+    size - 2 * padding,
+    size - 2 * padding,
     fg, ALIGN_MIDDLE
   );
 }
 
 void draw_cell_box(SDL_Renderer *ren, const SDL_Color color,
-                   const pos x, const pos y) {
+                   const pos x, const pos y, const pos size) {
   roundedBoxRGBA(
-    ren, x, y, x + CELL_SIZE, y + CELL_SIZE, CELL_BORDER_RAD,
+    ren, x, y,
+    x + size, y + size,
+    CELL_BORDER_RAD,
     color.r, color.g, color.b,
     255
   );
 }
 
-void draw_cell(SDL_Renderer *ren, const val value,
-               const dim row, const dim col) {
+void draw_cell_pos(SDL_Renderer *ren, const val value,
+                   const pos x, const pos y,
+                   const double scale) {
   const val ind = log2(value);
-  const pos x = BOARD_PADDING + 
-            (BOARD_PADDING + CELL_SIZE) * col;
-  const pos y = HEADER_SIZE + BOARD_PADDING + 
-            (BOARD_PADDING + CELL_SIZE) * row;
-  draw_cell_box(ren, cell_colors[ind], x, y);
+  const pos size = CELL_SIZE * scale,
+            dsize = CELL_SIZE - CELL_SIZE * scale,
+            padding = CELL_PADDING * scale;
+  const pos x_scaled = x + dsize / 2,
+            y_scaled = y + dsize / 2;
+  draw_cell_box(
+    ren, cell_colors[ind], x_scaled, y_scaled, size
+  );
   if (value != 0) {
     static char value_string[8];
     sprintf(value_string, "%i", value);
-    draw_cell_text(ren, value_string, x, y, cell_colors[ind]);
+    draw_cell_text(
+      ren, value_string, x_scaled, y_scaled,
+      size, padding, cell_colors[ind]
+    );
   }
+}
+
+void draw_cell(SDL_Renderer *ren, const val value,
+               const dim row, const dim col,
+               const double scale) {
+  pos x, y;
+  dim_to_pos(row, col, &x, &y);
+  draw_cell_pos(ren, value, x, y, scale);
+}
+
+void draw_cells(SDL_Renderer *ren, game_board board, const double scale) {
+  for (dim r = 0; r < BOARD_DIM; ++r)
+    for (dim c = 0; c < BOARD_DIM; ++c)
+      draw_cell(ren, board[r][c], r, c, scale);
 }
 
 void draw_header(SDL_Renderer *ren,
@@ -272,13 +303,10 @@ void draw_buttons(SDL_Renderer *ren,
   }
 }
 
-void draw_board(SDL_Renderer *ren, game_board board) {
+void draw_board(SDL_Renderer *ren) {
   SDL_SetRenderDrawColor(ren, 187,173,160, 255);
   SDL_Rect board_rect = {
 		0, HEADER_SIZE, BOARD_SIZE, BOARD_SIZE
 	};
   SDL_RenderFillRect(ren, &board_rect);
-  for (dim r = 0; r < BOARD_DIM; ++r)
-    for (dim c = 0; c < BOARD_DIM; ++c)
-      draw_cell(ren, board[r][c], r, c);
 }
