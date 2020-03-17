@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include "2048.c"
 #include "draw.c"
+#include "animate.c"
 
 #define NO_STDIO_REDIRECT
 
 int main(int argc, char *argv[])
 {
+	// game_play_console();
+	// return 0;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
@@ -53,24 +56,25 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	bool quit = false;
 	bool mouse_down = false;
+	render_state r_state = INTERACTIVE;
 
 	while (!quit) {
 		int mouse_x, mouse_y;
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
 				case SDL_KEYDOWN:
-					switch( event.key.keysym.sym ){
+					switch(event.key.keysym.sym){
 						case SDLK_LEFT:
-							game_action(&game, LEFT);
+							game_action(&game, DIRECTION_LEFT);
 							break;
 						case SDLK_RIGHT:
-							game_action(&game, RIGHT);
+							game_action(&game, DIRECTION_RIGHT);
 							break;
 						case SDLK_UP:
-							game_action(&game, UP);
+							game_action(&game, DIRECTION_UP);
 							break;
 						case SDLK_DOWN:
-							game_action(&game, DOWN);
+							game_action(&game, DIRECTION_DOWN);
 							break;
 						case SDLK_n:
 							game_initialize(&game);
@@ -107,9 +111,10 @@ int main(int argc, char *argv[])
 		if (!mouse_down)
 			button_handle_clicks(&game);
 		SDL_RenderClear(ren);
-		SDL_GetMouseState(&mouse_x, &mouse_y);
 		draw_header(ren, game.state, game.score);
-		draw_board(ren, game.board);
+		if (!animate_board(ren, game.board, game.shift))
+			draw_board(ren, game.board);
+		SDL_GetMouseState(&mouse_x, &mouse_y);
 		draw_buttons(ren, mouse_x, mouse_y, mouse_down);
 		SDL_RenderPresent(ren);
 	}

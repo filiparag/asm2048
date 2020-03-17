@@ -1,4 +1,6 @@
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <math.h>
 
 #define FONT_NAME "fonts/ClearSans-Medium.ttf"
 #define FONT_PT_SIZE 90
@@ -11,10 +13,7 @@
 #define CELL_PADDING CELL_SIZE / 6
 #define CELL_BORDER_RAD 5
 
-#define BTN_PADDING 5
-#define BTN_BORDER_RAD 3
-#define BTN_COLOR_DELTA 30
-#define BTN_NAME_LENGTH 32
+typedef Uint32 pos;
 
 typedef struct {
   SDL_Texture* texture;
@@ -27,21 +26,3 @@ typedef enum {
   ALIGN_MIDDLE,
   ALIGN_RIGHT
 } text_align;
-
-typedef enum {
-  BTN_NORMAL,
-  BTN_HOVERED,
-  BTN_ACTIVE
-} button_state;
-
-typedef enum {
-  ACTION_NEW_GAME
-} button_action;
-
-typedef struct {
-  char name[BTN_NAME_LENGTH];
-  text_align align;
-  Uint16 x, y, w, h;
-  SDL_Color color;
-  button_action action;
-} button;

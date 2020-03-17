@@ -8,6 +8,11 @@
   #include "draw.h"
 #endif
 
+#ifndef HEADER_BUTTONS
+  #define HEADER_BUTTONS
+  #include "buttons.h"
+#endif
+
 #define BUTTON_ACTION_COUNT 1
 
 const button buttons[] = {
@@ -18,12 +23,6 @@ const button buttons[] = {
     100, 30,
     {117, 167, 241},
     ACTION_NEW_GAME
-  },
-  {
-    "test",
-    ALIGN_MIDDLE,
-    250, 60, 100, 30,
-    {244, 149, 99}
   }
 };
 

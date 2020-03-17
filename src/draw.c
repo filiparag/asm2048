@@ -8,9 +8,6 @@
   #include "draw.h"
 #endif
 
-#include <math.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
 #include "buttons.c"
 
 const SDL_Color cell_colors[] = {
@@ -91,7 +88,8 @@ void color_foreground(const SDL_Color bg, SDL_Color* fg) {
   fg->a = 255;
 }
 
-text_raster* text_write(SDL_Renderer *ren, const char text[], const SDL_Color color) {
+text_raster* text_write(SDL_Renderer *ren,
+                        const char text[], const SDL_Color color) {
   font_open();
   text_raster* new_raster = (text_raster*) malloc(sizeof(text_raster));
   SDL_Surface* surface =  TTF_RenderText_Blended(font, text, color);
@@ -107,8 +105,8 @@ void inline text_destroy(text_raster* raster) {
 }
 
 void draw_text(SDL_Renderer *ren, const char text[],
-               const Uint16 x, const Uint16 y,
-               const Uint16 max_w, const Uint16 max_h,
+               const pos x, const pos y,
+               const pos max_w, const pos max_h,
                const SDL_Color color, const text_align align) {
   text_raster* raster = text_write(ren, text, color);
   SDL_Rect rect = (SDL_Rect){
@@ -180,7 +178,7 @@ void draw_button(SDL_Renderer *ren,
 }
 
 void draw_cell_text(SDL_Renderer *ren, const char text[],
-                    const Uint16 x, const Uint16 y,
+                    const pos x, const pos y,
                     const SDL_Color bg) {
   SDL_Color fg;
   color_foreground(bg, &fg);
@@ -192,18 +190,23 @@ void draw_cell_text(SDL_Renderer *ren, const char text[],
   );
 }
 
+void draw_cell_box(SDL_Renderer *ren, const SDL_Color color,
+                   const pos x, const pos y) {
+  roundedBoxRGBA(
+    ren, x, y, x + CELL_SIZE, y + CELL_SIZE, CELL_BORDER_RAD,
+    color.r, color.g, color.b,
+    255
+  );
+}
+
 void draw_cell(SDL_Renderer *ren, const val value,
                const dim row, const dim col) {
   const val ind = log2(value);
-  const Uint16 x = BOARD_PADDING + 
-                   (BOARD_PADDING + CELL_SIZE) * col;
-  const Uint16 y = HEADER_SIZE + BOARD_PADDING + 
-                   (BOARD_PADDING + CELL_SIZE) * row;
-  roundedBoxRGBA(
-    ren, x, y, x + CELL_SIZE, y + CELL_SIZE, CELL_BORDER_RAD,
-    cell_colors[ind].r, cell_colors[ind].g, cell_colors[ind].b,
-    255
-  );
+  const pos x = BOARD_PADDING + 
+            (BOARD_PADDING + CELL_SIZE) * col;
+  const pos y = HEADER_SIZE + BOARD_PADDING + 
+            (BOARD_PADDING + CELL_SIZE) * row;
+  draw_cell_box(ren, cell_colors[ind], x, y);
   if (value != 0) {
     static char value_string[8];
     sprintf(value_string, "%i", value);
@@ -225,8 +228,23 @@ void draw_header(SDL_Renderer *ren,
     BOARD_SIZE / 2 - BOARD_PADDING, 28,
     (SDL_Color) {119, 110, 101}, ALIGN_LEFT
   );
+  static char state_string[32];
+  switch (state) {
+    case LOST:
+      sprintf(state_string, "Lost");
+      break;
+    case PLAYING:
+      sprintf(state_string, "Playing");
+      break;
+    case WON:
+      sprintf(state_string, "Won");
+      break;
+    case OUT_OF_MOVES:
+      sprintf(state_string, "Out of moves");
+      break;
+  }
   draw_text(
-    ren, (state == PLAYING) ? "Playing" : "Lost",
+    ren, state_string,
     BOARD_PADDING, BOARD_PADDING + 48,
     BOARD_SIZE / 2 - BOARD_PADDING, 28,
     (SDL_Color) {119, 110, 101}, ALIGN_LEFT
@@ -234,7 +252,7 @@ void draw_header(SDL_Renderer *ren,
 }
 
 void draw_buttons(SDL_Renderer *ren,
-                  Uint16 mouse_x, Uint16 mouse_y, bool mouse_down) {
+                  pos mouse_x, pos mouse_y, bool mouse_down) {
 
   for (Uint8 b = 0; b < sizeof(buttons) / sizeof(button); ++b) {
     button_state btn_state = BTN_NORMAL;
