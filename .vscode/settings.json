@@ -4,6 +4,7 @@
     "type_traits": "c",
     "sdl.h": "c",
     "stdio.h": "c",
-    "cmath": "c"
+    "cmath": "c",
+    "sdl2_gfxprimitives.h": "c"
   }
 }

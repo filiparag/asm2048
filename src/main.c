@@ -52,11 +52,12 @@ int main(int argc, char *argv[])
 
 	SDL_Event event;
 	bool quit = false;
+	bool mouse_down = false;
 
 	while (!quit) {
-		while( SDL_PollEvent( &event ) ){
-			SDL_RenderClear(ren);
-			switch( event.type ){
+		int mouse_x, mouse_y;
+		while(SDL_PollEvent(&event)){
+			switch(event.type){
 				case SDL_KEYDOWN:
 					switch( event.key.keysym.sym ){
 						case SDLK_LEFT:
@@ -85,33 +86,32 @@ int main(int argc, char *argv[])
 							break;
 						default:
 								break;
-				}
+					}
 				case SDL_KEYUP:
-						break;
-
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT)
+						mouse_down = true;
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if (event.button.button == SDL_BUTTON_LEFT)
+						mouse_down = false;
+					break;
 				case SDL_QUIT:
-						quit = true;
-						break;
-
+					quit = true;
+					break;
 				default:
-						break;
+					break;
 			}
-			draw_header(ren, game.state, game.score);
-			draw_board(ren, game.board);
-			SDL_RenderPresent(ren);
-			SDL_Delay(1);
 		}
-		
-		// draw_cell(ren, 1, 0, 1);
-		// draw_cell(ren, 1, 0, 2);
-		// draw_cell(ren, 1, 0, 3);
-		// draw_cell(ren, 4, 0, 0);
-		// draw_cell(ren, 8, 1, 1);
-		// draw_cell(ren, 16, 2, 1);
-		// draw_cell(ren, 2, 1, 2);
-		// draw_cell(ren, 32, 3, 2);
-		// draw_cell(ren, 128, 3, 3);
-		
+		if (!mouse_down)
+			button_handle_clicks(&game);
+		SDL_RenderClear(ren);
+		SDL_GetMouseState(&mouse_x, &mouse_y);
+		draw_header(ren, game.state, game.score);
+		draw_board(ren, game.board);
+		draw_buttons(ren, mouse_x, mouse_y, mouse_down);
+		SDL_RenderPresent(ren);
 	}
 
 	SDL_DestroyRenderer(ren);

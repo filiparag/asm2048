@@ -137,8 +137,8 @@ void board_clear(game_board board) {
 }
 
 void game_initialize(game_store *game) {
-  if (game->state == PLAYING)
-    return;
+  // if (game->state == PLAYING)
+  //   return;
   board_clear(game->board);
   const dim count = random_cell(INIT_CELL_MAX) + 1;
   for (dim c = 0; c < count; ++c)
@@ -148,8 +148,8 @@ void game_initialize(game_store *game) {
 }
 
 void game_action(game_store *game, direction dir) {
-  // if (game->state != PLAYING)
-  //   return;
+  if (game->state != PLAYING)
+    return;
   bool moved = false;
   if (dir == LEFT || dir == RIGHT) {
     moved |= columns_move(game->board, dir);
