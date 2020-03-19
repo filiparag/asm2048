@@ -39,9 +39,9 @@ typedef struct {
 
 typedef struct {
   board_cell_pair move [2 * BOARD_DIM * BOARD_DIM];
-  board_cell_pair add [2 * BOARD_DIM * BOARD_DIM];
   board_cell insert [2 * BOARD_DIM * BOARD_DIM];
-  dim move_len, add_len, insert_len;
+  board_cell add [2 * BOARD_DIM * BOARD_DIM];
+  dim move_len, insert_len, add_len;
 } board_change;
 
 typedef struct {

@@ -8,6 +8,8 @@
     "sdl2_gfxprimitives.h": "c",
     "chrono": "c",
     "limits": "c",
-    "animations.h": "c"
+    "animations.h": "c",
+    "*.tcc": "c",
+    "string": "c"
   }
 }

@@ -35,18 +35,29 @@ sdim inline index_next(const direction dir) {
 
 void delta_move(board_change* change, const val value,
                  const dim ro, const dim co,
-                 const dim rd, const dim cd) {
-  change->move[change->move_len] = (board_cell_pair) {
-    {ro, co, value}, {rd, cd, value}
-  };
-  ++change->move_len;
+                 const dim rd, const dim cd,
+                 const bool merge) {
+  if (!merge) {
+    change->move[change->move_len] = (board_cell_pair) {
+      {ro, co, value}, {rd, cd, value}
+    };
+    ++change->move_len;
+  } else
+    for (dim m = 0; m < change->move_len; ++m)
+      if (
+        change->move[m].dest.value == value &&
+        change->move[m].dest.row == ro &&
+        change->move[m].dest.col == co
+      )
+        change->move[m].dest = (board_cell) {
+          rd, cd, value
+        };
 }
 
 void delta_add(board_change* change, const val value,
-                 const dim ro, const dim co,
-                 const dim rd, const dim cd) {
-  change->add[change->add_len] = (board_cell_pair) {
-    {ro, co, value}, {rd, cd, value}
+                 const dim row, const dim col) {
+  change->add[change->add_len] = (board_cell) {
+    row, col, value
   };
   ++change->add_len;
 }
@@ -77,9 +88,10 @@ val rows_add(game_board board, const direction dir,
         board[r][c] != 0 &&
         board[r][c] == board[r+next][c]
       ) {
-        if (change != NULL)
-          delta_move(change, board[r][c], r+next, c, r, c);
-          //delta_add(change, board[r][c], r+next, c, r, c);
+        if (change != NULL) {
+          delta_move(change, board[r][c], r+next, c, r, c, true);
+          delta_add(change, board[r][c] * 2, r, c);
+        }
         board[r][c] *= 2;
         board[r+next][c] = 0;
         score += board[r][c];
@@ -99,9 +111,10 @@ val columns_add(game_board board, const direction dir,
         board[r][c] != 0 &&
         board[r][c] == board[r][c+next]
       ) {
-        if (change != NULL)
-          delta_move(change, board[r][c], r, c+next, r, c);
-          //delta_add(change, board[r][c], r, c+next, r, c);
+        if (change != NULL) {
+          delta_move(change, board[r][c], r, c+next, r, c, true);
+          delta_add(change, board[r][c] * 2, r, c);
+        }
         board[r][c] *= 2;
         board[r][c+next] = 0;
         score += board[r][c];
@@ -125,7 +138,7 @@ bool rows_move(game_board board, const direction dir,
           board[r_next][c] = 0;
           moved = true;
           if (change != NULL)
-            delta_move(change, board[r][c], r_next, c, r, c);
+            delta_move(change, board[r][c], r_next, c, r, c, false);
         }
         r_next += next;
       }
@@ -149,7 +162,7 @@ bool columns_move(game_board board, const direction dir,
           board[r][c_next] = 0;
           moved = true;
           if (change != NULL)
-            delta_move(change, board[r][c], r, c_next, r, c);
+            delta_move(change, board[r][c], r, c_next, r, c, false);
         }
         c_next += next;
       }
@@ -228,6 +241,7 @@ void game_initialize(game_store *game) {
   for (dim c = 0; c < count; ++c)
     board_insert(game->board, &game->delta);
   game->state = PLAYING;
+  game->score = 0;
 }
 
 void game_action(game_store *game, const direction dir) {
@@ -267,6 +281,18 @@ void game_play_console() {
     board_print(game.board);
     if (game.state == LOST)
       printf("\nYou lost!\n");
+    
+    printf("\nMove:\n");
+    for (dim m = 0; m < game.delta.move_len; ++m)
+      printf(
+        "%4i (%i, %i) -> (%i, %i)\n",
+        game.delta.move[m].orig.value,
+        game.delta.move[m].orig.row,
+        game.delta.move[m].orig.col,
+        game.delta.move[m].dest.row,
+        game.delta.move[m].dest.col
+      );
+
     printf("\n:");
     char input;
     scanf("%c", &input);
@@ -287,6 +313,9 @@ void game_play_console() {
         break;
       case 'n':
         game_initialize(&game);
+      case 'f':
+        delta_clear(&game.delta);
+        board_insert(game.board, &game.delta);
         break;
       default:
         break;
