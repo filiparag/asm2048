@@ -53,6 +53,32 @@ void animate_flush_completed(game_board board) {
   }
   insert_len = insert_r_len;
 
+  scale_cell add_r[BUFFER_SIZE];
+  dim add_r_len = 0;
+  for (dim i = 0; i < add_len; ++i) {
+    if (add[i].elapsed_time <= SCALE_TIME) {
+      add_r[add_r_len] = (scale_cell) {
+        .value = add[i].value,
+        .row = add[i].row,
+        .col = add[i].col,
+        .elapsed_time = add[i].elapsed_time
+      };
+      ++add_r_len;
+    } else {
+      board[add[i].row][add[i].col] =
+        add[i].value;
+    }
+  }
+  for (dim i = 0; i < add_r_len; ++i) {
+    add[i] = (scale_cell) {
+      .value = add_r[i].value,
+      .row = add_r[i].row,
+      .col = add_r[i].col,
+      .elapsed_time = add_r[i].elapsed_time
+    };
+  }
+  add_len = add_r_len;
+
   translation_cell move_r[BUFFER_SIZE];
   dim move_r_len = 0;
   for (dim i = 0; i < move_len; ++i) {
@@ -109,10 +135,11 @@ void debug(SDL_Renderer* ren,
 double transition(const double curr, const double max,
                   const double strenght,
                   const transition_type type) {
-  if (type == EASE_SIGMOID) {
-      double x = strenght * (curr / max - 0.5);
-      return 1 / (1 + exp(-x));
-  } else
+  if (type == TRANSITION_SIGMOID)
+    return 1 / (1 + exp(-(strenght * (curr / max - 0.5))));
+  else if (type == TRANSITION_SQUARE)
+    return 1 - (0.4 * curr * strenght * (curr - max)) / pow(max, 2);
+  else
     return 1;
 }
 
@@ -145,7 +172,6 @@ void move_append(game_board board,
     for (dim r = move[i].orig.row; r <= move[i].dest.row; ++r)
       for (dim c = move[i].orig.col; c <= move[i].dest.col; ++c)
         board[r][c] = 0;
-    // board[move[i].dest.row][move[i].dest.col] = move[i].dest.value;
   }
 }
 
@@ -157,7 +183,7 @@ void insert_append(game_board board,
       .value = cells[i].value,
       .row = cells[i].row,
       .col = cells[i].col,
-      .scale = SCALE_ORIG,
+      .scale = SCALE_ORIG_INSERT,
       .elapsed_time = 0
     };
     ++insert_len;
@@ -165,13 +191,28 @@ void insert_append(game_board board,
   }
 }
 
+void add_append(game_board board,
+                const board_cell cells[],
+                const dim len) {
+  for (dim i = 0; i < len; ++i) {
+    add[add_len] = (scale_cell) {
+      .value = cells[i].value,
+      .row = cells[i].row,
+      .col = cells[i].col,
+      .scale = SCALE_ORIG_ADD,
+      .elapsed_time = 0
+    };
+    ++add_len;
+    board[cells[i].row][cells[i].col] = cells[i].value / 2;
+  }
+}
 void move_update(const double delta_time) {
   for (dim i = 0; i < move_len; ++i) {
     const double ratio = transition(
       move[i].elapsed_time,
       TRANSLATE_TIME,
       TRANSLATE_EASE_STRENGTH,
-      EASE_SIGMOID
+      TRANSITION_SIGMOID
     );
     pos orig_x, orig_y, dest_x, dest_y;
     dim_to_pos(
@@ -207,10 +248,22 @@ void insert_update(const double delta_time) {
     insert[i].scale = transition(
       insert[i].elapsed_time,
       SCALE_TIME,
-      SCALE_EASE_STRENGTH,
-      EASE_SIGMOID
+      SCALE_STRENGTH_INSERT,
+      TRANSITION_SIGMOID
     );
     insert[i].elapsed_time += delta_time;
+  }
+}
+
+void add_update(const double delta_time) {
+  for (dim i = 0; i < add_len; ++i) {
+    add[i].scale = transition(
+      add[i].elapsed_time,
+      SCALE_TIME,
+      SCALE_STRENGTH_ADD,
+      TRANSITION_SQUARE
+    );
+    add[i].elapsed_time += delta_time;
   }
 }
 
@@ -233,6 +286,17 @@ void insert_render(SDL_Renderer* ren) {
       insert[i].row,
       insert[i].col,
       insert[i].scale
+    );
+}
+
+void add_render(SDL_Renderer* ren) {
+  for (dim i = 0; i < add_len; ++i)
+    draw_cell(
+      ren,
+      add[i].value,
+      add[i].row,
+      add[i].col,
+      add[i].scale
     );
 }
 
@@ -267,23 +331,26 @@ bool animate_board(SDL_Renderer* ren,
   animate_flush_completed(board_render);
 
   move_append(board_render, change->move, change->move_len);
+  add_append(board_render, change->add, change->add_len);
   insert_append(board_render, change->insert, change->insert_len);
 
   delta_clear(change);
   
   move_update(delta_time);
+  add_update(delta_time);
   insert_update(delta_time);
 
   draw_cells(ren, board_render, 1);
 
   move_render(ren);
+  add_render(ren);
   insert_render(ren);
 
-  sprintf(fps, "%5i", move_len);
+  sprintf(fps, "%5i", add_len);
   draw_text(
     ren, fps, BOARD_SIZE / 2, HEADER_SIZE / 2 + 30,
     0, 30, (SDL_Color){0,0,0}, ALIGN_LEFT
   );
   
-  return move_len > 0 || insert_len > 0;
+  return move_len > 0 || insert_len > 0 || add_len > 0;
 }

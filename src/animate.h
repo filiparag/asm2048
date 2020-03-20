@@ -5,13 +5,15 @@
 
 #include<math.h>
 
-#define ANIMATION_TIME 1000
+#define ANIMATION_TIME 200
 
 #define BUFFER_SIZE 2 * BOARD_DIM * BOARD_DIM
 
-#define SCALE_ORIG 0.0
+#define SCALE_ORIG_INSERT 0.0
+#define SCALE_ORIG_ADD 1.0
 #define SCALE_TIME ANIMATION_TIME
-#define SCALE_EASE_STRENGTH 5
+#define SCALE_STRENGTH_INSERT 5
+#define SCALE_STRENGTH_ADD 1
 
 #define TRANSLATE_TIME ANIMATION_TIME
 #define TRANSLATE_EASE_STRENGTH 5
@@ -22,7 +24,8 @@ typedef enum {
 } render_state;
 
 typedef enum {
-  EASE_SIGMOID
+  TRANSITION_SIGMOID,
+  TRANSITION_SQUARE
 } transition_type;
 
 typedef struct {

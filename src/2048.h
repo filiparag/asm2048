@@ -8,17 +8,17 @@
 #define INIT_CELL_MAX 5
 
 typedef enum {
-  LOST,
-  PLAYING,
-  WON,
-  OUT_OF_MOVES
+  PLAYING = 0,
+  LOST = 1,
+  WON = 2,
+  OUT_OF_MOVES = 3
 } game_state;
 
 typedef enum {
-  DIRECTION_UP,
-  DIRECTION_DOWN,
-  DIRECTION_LEFT,
-  DIRECTION_RIGHT
+  DIRECTION_UP = 0,
+  DIRECTION_DOWN = 1,
+  DIRECTION_LEFT = 2,
+  DIRECTION_RIGHT = 3
 } direction;
 
 typedef __uint16_t val;

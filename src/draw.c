@@ -214,8 +214,8 @@ void draw_cell_pos(SDL_Renderer *ren, const val value,
                    const double scale) {
   const val ind = log2(value);
   const pos size = CELL_SIZE * scale,
-            dsize = CELL_SIZE - CELL_SIZE * scale,
             padding = CELL_PADDING * scale;
+  const double dsize = CELL_SIZE - CELL_SIZE * scale;
   const pos x_scaled = x + dsize / 2,
             y_scaled = y + dsize / 2;
   draw_cell_box(
