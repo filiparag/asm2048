@@ -27,9 +27,7 @@ typedef enum {
 
 typedef struct {
   val value;
-  pos x, y,
-      orig_x, orig_y,
-      dest_x, dest_y;
+  pos x, y;
   board_cell orig, dest;
   double elapsed_time;
 } translation_cell;

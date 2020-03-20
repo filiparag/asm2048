@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
 	game_board old_board;
 	for (dim r = 0; r < BOARD_DIM; ++r)
-				for (dim c = 0; c < BOARD_DIM; ++c)
-					old_board[r][c] = 0;
+		for (dim c = 0; c < BOARD_DIM; ++c)
+			old_board[r][c] = 0;
 
 	while (!quit) {
 		int mouse_x, mouse_y;
@@ -86,6 +86,10 @@ int main(int argc, char *argv[])
 							break;
 						case SDLK_n:
 							game_initialize(&game);
+							animate_clear();
+							for (dim r = 0; r < BOARD_DIM; ++r)
+								for (dim c = 0; c < BOARD_DIM; ++c)
+									old_board[r][c] = 0;
 							break;
 						case SDLK_q:
 							quit = true;

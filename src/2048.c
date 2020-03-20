@@ -37,21 +37,26 @@ void delta_move(board_change* change, const val value,
                  const dim ro, const dim co,
                  const dim rd, const dim cd,
                  const bool merge) {
-  if (!merge) {
-    change->move[change->move_len] = (board_cell_pair) {
-      {ro, co, value}, {rd, cd, value}
-    };
-    ++change->move_len;
-  } else
+  bool merged = false;
+  if (merge)
     for (dim m = 0; m < change->move_len; ++m)
       if (
         change->move[m].dest.value == value &&
         change->move[m].dest.row == ro &&
         change->move[m].dest.col == co
-      )
+      ) {
         change->move[m].dest = (board_cell) {
           rd, cd, value
         };
+        merged = true;
+        break;
+      }
+  if (!merge || !merged) {
+    change->move[change->move_len] = (board_cell_pair) {
+      {ro, co, value}, {rd, cd, value}
+    };
+    ++change->move_len;
+  }
 }
 
 void delta_add(board_change* change, const val value,
@@ -276,22 +281,11 @@ void game_play_console() {
   game_store game;
   game_initialize(&game);
   while (true) {
-    printf("\x1B[1;1H\x1B[2J");
+    
     printf("Score: %9i\n\n", game.score);
     board_print(game.board);
     if (game.state == LOST)
       printf("\nYou lost!\n");
-    
-    printf("\nMove:\n");
-    for (dim m = 0; m < game.delta.move_len; ++m)
-      printf(
-        "%4i (%i, %i) -> (%i, %i)\n",
-        game.delta.move[m].orig.value,
-        game.delta.move[m].orig.row,
-        game.delta.move[m].orig.col,
-        game.delta.move[m].dest.row,
-        game.delta.move[m].dest.col
-      );
 
     printf("\n:");
     char input;
@@ -320,5 +314,23 @@ void game_play_console() {
       default:
         break;
     }
+
+    printf("\n");
+    board_print(game.board);
+    printf("\n");
+
+    for (dim m = 0; m < game.delta.move_len; ++m)
+      printf(
+        "\n%5i (%i, %i) -> (%i, %i)",
+        game.delta.move[m].orig.value,
+        game.delta.move[m].orig.row,
+        game.delta.move[m].orig.col,
+        game.delta.move[m].dest.row,
+        game.delta.move[m].dest.col
+      );
+
+    scanf("\n");
+    printf("\x1B[1;1H\x1B[2J");
+    
   }
 }
