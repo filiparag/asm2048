@@ -73,15 +73,27 @@ int main(int argc, char *argv[])
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym){
 						case SDLK_LEFT:
+							for (dim r = 0; r < BOARD_DIM; ++r)
+								for (dim c = 0; c < BOARD_DIM; ++c)
+									old_board[r][c] = game.board[r][c];
 							game_action(&game, DIRECTION_LEFT);
 							break;
 						case SDLK_RIGHT:
+							for (dim r = 0; r < BOARD_DIM; ++r)
+								for (dim c = 0; c < BOARD_DIM; ++c)
+									old_board[r][c] = game.board[r][c];
 							game_action(&game, DIRECTION_RIGHT);
 							break;
 						case SDLK_UP:
+							for (dim r = 0; r < BOARD_DIM; ++r)
+								for (dim c = 0; c < BOARD_DIM; ++c)
+									old_board[r][c] = game.board[r][c];
 							game_action(&game, DIRECTION_UP);
 							break;
 						case SDLK_DOWN:
+							for (dim r = 0; r < BOARD_DIM; ++r)
+								for (dim c = 0; c < BOARD_DIM; ++c)
+									old_board[r][c] = game.board[r][c];
 							game_action(&game, DIRECTION_DOWN);
 							break;
 						case SDLK_n:
@@ -120,25 +132,35 @@ int main(int argc, char *argv[])
 					break;
 			}
 		}
-		if (!mouse_down)
+		if (!mouse_down) {
 			button_handle_clicks(&game);
+		} else {
+			dim r, c;
+			pos_to_dim(mouse_x, mouse_y, &r, &c);
+			if (r < BOARD_DIM && c < BOARD_DIM) {
+				if (game.board[r][c] == 0)
+					game.board[r][c] = 2;
+				else
+					game.board[r][c] *= 2;
+			}
+			SDL_Delay(100);
+		}
 		SDL_RenderClear(ren);
 		draw_header(ren, game.state, game.score);
 		draw_board(ren);
 		draw_buttons(ren, mouse_x, mouse_y, mouse_down);
 		last_frame = current_frame;
 		current_frame = SDL_GetPerformanceCounter();
-		delta_millis = (double)((current_frame - last_frame)*1000 /
-									 (double)SDL_GetPerformanceFrequency());
+		delta_millis = (double) ((current_frame - last_frame) * 1000 /
+									 (double) SDL_GetPerformanceFrequency());
 		if (!animate_board(ren, delta_millis, game.board, old_board, &game.delta)) {
 			draw_cells(ren, game.board, 1);
-			for (dim r = 0; r < BOARD_DIM; ++r)
-				for (dim c = 0; c < BOARD_DIM; ++c)
-					old_board[r][c] = game.board[r][c];
 		}
+
 		SDL_GetMouseState(&mouse_x, &mouse_y);
 		SDL_RenderPresent(ren);
 	}
+
 
 	SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);

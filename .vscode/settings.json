@@ -10,6 +10,23 @@
     "limits": "c",
     "animations.h": "c",
     "*.tcc": "c",
-    "string": "c"
+    "string": "c",
+    "deque": "c",
+    "list": "c",
+    "unordered_map": "c",
+    "vector": "c",
+    "optional": "c",
+    "istream": "c",
+    "ostream": "c",
+    "ratio": "c",
+    "system_error": "c",
+    "array": "c",
+    "functional": "c",
+    "tuple": "c",
+    "utility": "c",
+    "asm.h": "c",
+    "string_view": "c",
+    "algorithm": "c",
+    "numeric": "c"
   }
 }

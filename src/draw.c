@@ -64,6 +64,15 @@ void dim_to_pos(const dim row, const dim col,
     (BOARD_PADDING + CELL_SIZE) * row;
 }
 
+void pos_to_dim(const pos x, const pos y,
+                dim* row, dim* col) {
+  *row = (y - BOARD_PADDING) / 
+    (BOARD_PADDING + CELL_SIZE) - 1;
+  *col = (x - BOARD_PADDING) / 
+    (BOARD_PADDING + CELL_SIZE);
+}
+
+
 void color_sub(SDL_Color* base, const SDL_Color delta) {
   if (base->r - delta.r >= 0)
     base->r -= delta.r;
@@ -299,7 +308,6 @@ void draw_buttons(SDL_Renderer *ren,
     draw_button(ren, buttons[b], btn_state);
     if (btn_state == BTN_ACTIVE)
       button_click(buttons[b].action);
-    // draw_text(ren, buttons[b].name, 10, 10, 0, 20, (SDL_Color){0,0,0}, ALIGN_NONE);
   }
 }
 

@@ -19,6 +19,8 @@ scale_cell add[BUFFER_SIZE];
 dim move_len = 0, add_len = 0, insert_len = 0,
     move_first = 0, add_first = 0, insert_first = 0;
 
+game_board board_render;
+bool board_move_keep[BOARD_DIM][BOARD_DIM];
 
 void animate_clear() {
   move_len = 0;
@@ -26,11 +28,14 @@ void animate_clear() {
   insert_len = 0;
 }
 
-void animate_flush_completed(game_board board) {
+void animate_flush_completed() {
   scale_cell insert_r[BUFFER_SIZE];
   dim insert_r_len = 0;
   for (dim i = 0; i < insert_len; ++i) {
-    if (insert[i].elapsed_time <= SCALE_TIME) {
+    if (
+      insert[i].elapsed_time <=
+      ANIM_INSERT_DELAY + ANIM_INSERT_DURATION
+    ) {
       insert_r[insert_r_len] = (scale_cell) {
         .value = insert[i].value,
         .row = insert[i].row,
@@ -39,7 +44,7 @@ void animate_flush_completed(game_board board) {
       };
       ++insert_r_len;
     } else {
-      board[insert[i].row][insert[i].col] =
+      board_render[insert[i].row][insert[i].col] =
         insert[i].value;
     }
   }
@@ -56,7 +61,10 @@ void animate_flush_completed(game_board board) {
   scale_cell add_r[BUFFER_SIZE];
   dim add_r_len = 0;
   for (dim i = 0; i < add_len; ++i) {
-    if (add[i].elapsed_time <= SCALE_TIME) {
+    if (
+      add[i].elapsed_time <=
+      ANIM_ADD_DELAY + ANIM_ADD_DURATION
+    ) {
       add_r[add_r_len] = (scale_cell) {
         .value = add[i].value,
         .row = add[i].row,
@@ -65,7 +73,7 @@ void animate_flush_completed(game_board board) {
       };
       ++add_r_len;
     } else {
-      board[add[i].row][add[i].col] =
+      board_render[add[i].row][add[i].col] =
         add[i].value;
     }
   }
@@ -82,7 +90,10 @@ void animate_flush_completed(game_board board) {
   translation_cell move_r[BUFFER_SIZE];
   dim move_r_len = 0;
   for (dim i = 0; i < move_len; ++i) {
-    if (move[i].elapsed_time <= SCALE_TIME) {
+    if (
+      move[i].elapsed_time <=
+      ANIM_MOVE_DELAY + ANIM_MOVE_DURATION
+    ) {
       move_r[move_r_len] = (translation_cell) {
         .value = move[i].value,
         .x = move[i].x,
@@ -99,7 +110,7 @@ void animate_flush_completed(game_board board) {
       };
       ++move_r_len;
     } else {
-      board[move[i].dest.row][move[i].dest.col] =
+      board_render[move[i].dest.row][move[i].dest.col] =
         move[i].value;
     }
   }
@@ -136,15 +147,18 @@ double transition(const double curr, const double max,
                   const double strenght,
                   const transition_type type) {
   if (type == TRANSITION_SIGMOID)
-    return 1 / (1 + exp(-(strenght * (curr / max - 0.5))));
+    return 1 / (
+      1 + exp(-(strenght * (curr / max - 0.5)))
+    );
   else if (type == TRANSITION_SQUARE)
-    return 1 - (0.4 * curr * strenght * (curr - max)) / pow(max, 2);
+    return 1 - (
+      0.4 * curr * strenght * (curr - max)
+    ) / pow(max, 2);
   else
     return 1;
 }
 
-void move_append(game_board board,
-                 const board_cell_pair cells[],
+void move_append(const board_cell_pair cells[],
                  const dim len) {
   for (dim i = 0; i < len; ++i) {
     pos x, y;
@@ -169,100 +183,129 @@ void move_append(game_board board,
       .elapsed_time = 0
     };
     ++move_len;
-    for (dim r = move[i].orig.row; r <= move[i].dest.row; ++r)
-      for (dim c = move[i].orig.col; c <= move[i].dest.col; ++c)
-        board[r][c] = 0;
+    dim r_from, r_to, c_from, c_to;
+    if (move[i].orig.row < move[i].dest.row) {
+      r_from = move[i].orig.row;
+      r_to = move[i].dest.row;
+    } else {
+      r_from = move[i].dest.row;
+      r_to = move[i].orig.row;
+    }
+    if (move[i].orig.col < move[i].dest.col) {
+      c_from = move[i].orig.col;
+      c_to = move[i].dest.col;
+    } else {
+      c_from = move[i].dest.col;
+      c_to = move[i].orig.col;
+    }
+    if (
+      board_render[move[i].dest.row]
+        [move[i].dest.col] == move[i].dest.value
+    )
+      board_move_keep[move[i].dest.row]
+        [move[i].dest.col] = true;
+    for (dim r = r_from; r <= r_to; ++r)
+      for (dim c = c_from; c <= c_to; ++c)
+        board_render[r][c] = 0;
   }
 }
 
-void insert_append(game_board board,
-                   const board_cell cells[],
+void insert_append(const board_cell cells[],
                    const dim len) {
   for (dim i = 0; i < len; ++i) {
     insert[insert_len] = (scale_cell) {
       .value = cells[i].value,
       .row = cells[i].row,
       .col = cells[i].col,
-      .scale = SCALE_ORIG_INSERT,
+      .scale = ANIM_INSERT_SCALE,
       .elapsed_time = 0
     };
     ++insert_len;
-    board[cells[i].row][cells[i].col] = 0;
+    board_render[cells[i].row][cells[i].col] = 0;
   }
 }
 
-void add_append(game_board board,
-                const board_cell cells[],
+void add_append(const board_cell cells[],
                 const dim len) {
   for (dim i = 0; i < len; ++i) {
     add[add_len] = (scale_cell) {
       .value = cells[i].value,
       .row = cells[i].row,
       .col = cells[i].col,
-      .scale = SCALE_ORIG_ADD,
+      .scale = ANIM_ADD_SCALE,
       .elapsed_time = 0
     };
     ++add_len;
-    board[cells[i].row][cells[i].col] = cells[i].value / 2;
+    board_render[cells[i].row][cells[i].col] = 0;
   }
 }
 void move_update(const double delta_time) {
   for (dim i = 0; i < move_len; ++i) {
-    const double ratio = transition(
-      move[i].elapsed_time,
-      TRANSLATE_TIME,
-      TRANSLATE_EASE_STRENGTH,
-      TRANSITION_SIGMOID
-    );
-    pos orig_x, orig_y, dest_x, dest_y;
-    dim_to_pos(
-      move[i].orig.row,
-      move[i].orig.col,
-      &orig_x,
-      &orig_y
-    );
-    dim_to_pos(
-      move[i].dest.row,
-      move[i].dest.col,
-      &dest_x,
-      &dest_y
-    );
-    if (orig_x == dest_x)
-      move[i].y = (
-        orig_y + (
-          (int) dest_y - (int) orig_y
-        ) * ratio
+    if (move[i].elapsed_time >= ANIM_MOVE_DELAY) {
+      const double ratio = transition(
+        move[i].elapsed_time - ANIM_MOVE_DELAY,
+        ANIM_MOVE_DURATION,
+        ANIM_MOVE_STRENGTH,
+        TRANSITION_SIGMOID
       );
-    else
-      move[i].x = (
-        orig_x + (
-          (int) dest_x - (int) orig_x
-        ) * ratio
+      pos orig_x, orig_y, dest_x, dest_y;
+      dim_to_pos(
+        move[i].orig.row,
+        move[i].orig.col,
+        &orig_x,
+        &orig_y
       );
+      dim_to_pos(
+        move[i].dest.row,
+        move[i].dest.col,
+        &dest_x,
+        &dest_y
+      );
+      if (orig_x == dest_x)
+        move[i].y = (
+          orig_y + (
+            (int) dest_y - (int) orig_y
+          ) * ratio
+        );
+      else
+        move[i].x = (
+          orig_x + (
+            (int) dest_x - (int) orig_x
+          ) * ratio
+        );
+    }
     move[i].elapsed_time += delta_time;
   }
 }
 
 void insert_update(const double delta_time) {
   for (dim i = 0; i < insert_len; ++i) {
-    insert[i].scale = transition(
-      insert[i].elapsed_time,
-      SCALE_TIME,
-      SCALE_STRENGTH_INSERT,
-      TRANSITION_SIGMOID
-    );
+    if (insert[i].elapsed_time >= ANIM_INSERT_DELAY) {
+      insert[i].scale = transition(
+        insert[i].elapsed_time - ANIM_INSERT_DELAY,
+        ANIM_INSERT_DURATION,
+        ANIM_INSERT_STRENGTH,
+        TRANSITION_SIGMOID
+      );
+    }
     insert[i].elapsed_time += delta_time;
   }
 }
 
 void add_update(const double delta_time) {
   for (dim i = 0; i < add_len; ++i) {
-    add[i].scale = transition(
-      add[i].elapsed_time,
-      SCALE_TIME,
-      SCALE_STRENGTH_ADD,
-      TRANSITION_SQUARE
-    );
+    if (add[i].elapsed_time >= ANIM_ADD_DELAY) {
+      add[i].scale = transition(
+        add[i].elapsed_time - ANIM_ADD_DELAY,
+        ANIM_ADD_DURATION,
+        ANIM_ADD_STRENGTH,
+        TRANSITION_SQUARE
+      );
+    } else {
+      if (!board_move_keep[add[i].row][add[i].col])
+        board_render[add[i].row][add[i].col] =
+          add[i].value / 2;
+    }
     add[i].elapsed_time += delta_time;
   }
 }
@@ -300,17 +343,26 @@ void add_render(SDL_Renderer* ren) {
     );
 }
 
-void board_unchanged(game_board new, game_board old,
-                     game_board unchanged) {
+void board_unchanged(game_board new, game_board old) {
   for (dim r = 0; r < BOARD_DIM; ++r)
-    for (dim c = 0; c < BOARD_DIM; ++c)
+    for (dim c = 0; c < BOARD_DIM; ++c) {
       if (
         new[r][c] != 0 &&
         new[r][c] == old[r][c]
       )
-        unchanged[r][c] = new[r][c];
+        board_render[r][c] = new[r][c];
       else
-        unchanged[r][c] = 0;
+        board_render[r][c] = 0;
+      board_move_keep[r][c] = false;
+    }
+}
+
+void board_copy(game_board board) {
+  for (dim r = 0; r < BOARD_DIM; ++r)
+    for (dim c = 0; c < BOARD_DIM; ++c) {
+      board_render[r][c] = board[r][c];
+      board_move_keep[r][c] = false;
+    }
 }
 
 bool animate_board(SDL_Renderer* ren,
@@ -318,21 +370,28 @@ bool animate_board(SDL_Renderer* ren,
                    game_board board, game_board board_old,
                    board_change* change) {
 
-  static char fps[24];
-  sprintf(fps, "%5.3f", 1000 / delta_time);
-  draw_text(
-    ren, fps, BOARD_SIZE / 2, HEADER_SIZE / 2,
-    0, 30, (SDL_Color){0,0,0}, ALIGN_LEFT
-  );
-  
-  game_board board_render;
-  board_unchanged(board, board_old, board_render);
+  if (
+    move_len == 0 &&
+    insert_len == 0 &&
+    add_len == 0
+  ) {
+    if (
+      change->move_len == 0 &&
+      change->insert_len == 0 &&
+      change->add_len == 0
+    )
+      return false;
+    else
+      board_copy(board_old);
+  }
 
-  animate_flush_completed(board_render);
+  debug(ren, 1000 / delta_time, 0);
 
-  move_append(board_render, change->move, change->move_len);
-  add_append(board_render, change->add, change->add_len);
-  insert_append(board_render, change->insert, change->insert_len);
+  animate_flush_completed();
+
+  move_append(change->move, change->move_len);
+  add_append(change->add, change->add_len);
+  insert_append(change->insert, change->insert_len);
 
   delta_clear(change);
   
@@ -345,12 +404,6 @@ bool animate_board(SDL_Renderer* ren,
   move_render(ren);
   add_render(ren);
   insert_render(ren);
-
-  sprintf(fps, "%5i", add_len);
-  draw_text(
-    ren, fps, BOARD_SIZE / 2, HEADER_SIZE / 2 + 30,
-    0, 30, (SDL_Color){0,0,0}, ALIGN_LEFT
-  );
   
   return move_len > 0 || insert_len > 0 || add_len > 0;
 }
