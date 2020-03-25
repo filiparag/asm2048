@@ -1,5 +1,4 @@
-#ifndef _DRAW_
-#define _DRAW_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -50,9 +49,9 @@ const SDL_Color cell_colors[] = {
 
 TTF_Font* font = NULL;
 
-void inline font_open();
+void font_open();
 
-void inline font_close();
+void font_close();
 
 void color_add(
   SDL_Color* base, const SDL_Color delta
@@ -81,7 +80,7 @@ text_raster* text_write(
   const char text[], const SDL_Color color
 );
 
-void inline text_destroy(
+void text_destroy(
   text_raster* raster
 );
 
@@ -137,5 +136,3 @@ void draw_buttons(
 void draw_board(
   SDL_Renderer *ren
 );
-
-#endif

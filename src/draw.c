@@ -1,11 +1,11 @@
 #include "draw.h"
 
-void inline font_open() {
+void font_open() {
   if (font == NULL)
     font = TTF_OpenFont(FONT_NAME, FONT_PT_SIZE);
 }
 
-void inline font_close() {
+void font_close() {
   if (font != NULL)
     TTF_CloseFont(font);
 }
@@ -89,7 +89,7 @@ text_raster* text_write(SDL_Renderer *ren,
   return new_raster;
 }
 
-void inline text_destroy(text_raster* raster) {
+void text_destroy(text_raster* raster) {
   SDL_DestroyTexture(raster->texture);
   free(raster);
 }

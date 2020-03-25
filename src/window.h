@@ -1,5 +1,4 @@
-#ifndef _WINDOW_
-#define _WINDOW_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -11,5 +10,3 @@ SDL_Renderer* ren;
 bool window_init();
 void window_render();
 void window_close();
-
-#endif

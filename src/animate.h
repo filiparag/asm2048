@@ -1,5 +1,4 @@
-#ifndef _ANIMATE_
-#define _ANIMATE_
+#pragma once
 
 #include <math.h>
 #include "draw.h"
@@ -123,6 +122,3 @@ bool animate_board(
   game_board board, game_board board_old,
   board_change* change
 );
-
-
-#endif

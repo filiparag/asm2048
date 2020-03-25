@@ -1,7 +1,7 @@
-#ifndef _BUTTONS_
-#define _BUTTONS_
+#pragma once
 
 #include <SDL2/SDL.h>
+#include "2048.h"
 #include "draw.h"
 
 #define BTN_PADDING 5
@@ -43,12 +43,10 @@ const button buttons[] = {
 bool button_buffer[BUTTON_ACTION_COUNT];
 Uint8 button_buffer_length = 0;
 
-void inline button_click(
+void button_click(
   const button_action action
 );
 
 void button_handle_clicks(
   game_store* game
 );
-
-#endif

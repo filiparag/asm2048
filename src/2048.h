@@ -1,5 +1,4 @@
-#ifndef _2048_
-#define _2048_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,15 +58,15 @@ void board_print(
 	game_board board
 );
 
-dim inline index_first(
+dim index_first(
 	const direction dir, const dim border
 );
 
-dim inline index_last(
+dim index_last(
 	const direction dir, const dim border
 );
 
-sdim inline index_next(
+sdim index_next(
 	const direction dir
 );
 
@@ -112,9 +111,9 @@ bool columns_move(
   board_change* change
 );
 
-val inline random_value();
+val random_value();
 
-dim inline random_cell(
+dim random_cell(
 	const dim count
 );
 
@@ -143,5 +142,3 @@ void game_action(
 );
 
 void game_play_console();
-
-#endif

@@ -1,8 +1,8 @@
-#ifndef _GAME_
-#define _GAME_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include "2048.h"
+#include "animate.h"
 #include "buttons.h"
 
 typedef struct {
@@ -23,6 +23,7 @@ mouse_state mouse = {
 time_state game_time = {0};
 
 void time_update();
+
 void event_key_down(
   game_store* game, SDL_Keycode key
 );
@@ -42,5 +43,3 @@ void handle_input(
 void game_tick(
   game_store* game, bool input_enabled
 );
-
-#endif

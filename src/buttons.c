@@ -1,6 +1,6 @@
 #include "buttons.h"
 
-void inline button_click(const button_action action) {
+void button_click(const button_action action) {
   button_buffer[action] = true;
 }
 

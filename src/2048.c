@@ -9,21 +9,21 @@ void board_print(game_board board) {
   }
 }
 
-dim inline index_first(const direction dir, const dim border) {
+dim index_first(const direction dir, const dim border) {
   if (dir == DIRECTION_UP || dir == DIRECTION_LEFT)
     return 0;
   else
     return BOARD_DIM - border;
 }
 
-dim inline index_last(const direction dir, const dim border) {
+dim index_last(const direction dir, const dim border) {
   if (dir == DIRECTION_UP || dir == DIRECTION_LEFT)
     return BOARD_DIM - border;
   else
     return 0;
 }
 
-sdim inline index_next(const direction dir) {
+sdim index_next(const direction dir) {
   if (dir == DIRECTION_UP || dir == DIRECTION_LEFT)
     return 1;
   else
@@ -172,11 +172,11 @@ bool columns_move(game_board board, const direction dir,
   return moved;
 }
 
-val inline random_value() {
+val random_value() {
   return 1 << (rand() % RND_POW_MAX + 1);
 }
 
-dim inline random_cell(const dim count) {
+dim random_cell(const dim count) {
   return rand() % count;
 }
 
@@ -273,7 +273,7 @@ void game_action(game_store *game, const direction dir) {
   }
 }
 
-void game_play_console() {
+void play() {
   srand(time(NULL));
   game_store game;
   game_initialize(&game);
