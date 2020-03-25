@@ -1,11 +1,7 @@
-#ifndef HEADER_DRAW
-  #define HEADER_DRAW
-  #include "draw.h"
-#endif
-
 #include<math.h>
+#include "draw.h"
 
-#define ANIMATION_TIME 2000
+#define ANIMATION_TIME 200
 
 #define BUFFER_SIZE 2 * BOARD_DIM * BOARD_DIM
 

@@ -1,7 +1,4 @@
-#ifndef HEADER_LOGIC
-  #define HEADER_LOGIC
-  #include "2048.h"
-#endif
+#include "2048.h"
 
 void board_print(game_board board) {
   for (dim r = 0; r < BOARD_DIM; ++r) {
@@ -245,12 +242,12 @@ void game_initialize(game_store *game) {
   const dim count = random_cell(INIT_CELL_MAX) + 1;
   for (dim c = 0; c < count; ++c)
     board_insert(game->board, &game->delta);
-  game->state = PLAYING;
+  game->state = STATE_PLAYING;
   game->score = 0;
 }
 
 void game_action(game_store *game, const direction dir) {
-  if (game->state == LOST || game->state == OUT_OF_MOVES)
+  if (game->state == STATE_LOST || game->state == STATE_OUT_OF_MOVES)
     return;
   bool moved = false;
   delta_clear(&game->delta);
@@ -266,13 +263,13 @@ void game_action(game_store *game, const direction dir) {
   const val cell_max = board_max(game->board);
   if (moved) {
     if (cell_max >= 2048)
-      game->state = WON;
+      game->state = STATE_WON;
     board_insert(game->board, &game->delta);
   } else if (!moved && board_out_of_moves(game->board)) {
     if (cell_max < 2048)
-      game->state = LOST;
+      game->state = STATE_LOST;
     else
-      game->state = OUT_OF_MOVES;
+      game->state = STATE_OUT_OF_MOVES;
   }
 }
 
@@ -284,7 +281,7 @@ void game_play_console() {
     
     printf("Score: %9i\n\n", game.score);
     board_print(game.board);
-    if (game.state == LOST)
+    if (game.state == STATE_LOST)
       printf("\nYou lost!\n");
 
     printf("\n:");

@@ -1,173 +1,60 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "2048.c"
-#include "draw.c"
-#include "animate.c"
+#include <stdbool.h>
 
-#define NO_STDIO_REDIRECT
+#include "window.h"
+#include "2048.h"
+#include "game.h"
+#include "draw.h"
+#include "buttons.h"
+#include "animate.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+	
 	// game_play_console();
 	// return 0;
 
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
+	if (!window_init())
 		return EXIT_FAILURE;
-	}
-
-	SDL_Window *win = SDL_CreateWindow(
-		"2048",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		BOARD_SIZE,
-		BOARD_SIZE + HEADER_SIZE,
-		SDL_WINDOW_SHOWN
-	);
-	if (win == NULL) {
-		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-		return EXIT_FAILURE;
-	}
-
-	SDL_Renderer *ren = SDL_CreateRenderer(
-		win,
-		-1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
-	if (ren == NULL) {
-		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-		if (win != NULL) {
-			SDL_DestroyWindow(win);
-		}
-		SDL_Quit();
-		return EXIT_FAILURE;
-	}
-
-	if (TTF_Init() < 0) {
-		SDL_Quit();
-		return EXIT_FAILURE;
-	}
 
 	srand(time(NULL));
-  game_store game = {LOST};
+  game_store game = {STATE_LOST};
   game_initialize(&game);
-
-	SDL_Event event;
-	bool quit = false;
-	bool mouse_down = false;
-	Uint64 last_frame;
-	Uint64 current_frame = SDL_GetPerformanceCounter();
-	double delta_millis;
-	render_state r_state = INTERACTIVE;
 
 	game_board old_board;
 	for (dim r = 0; r < BOARD_DIM; ++r)
 		for (dim c = 0; c < BOARD_DIM; ++c)
 			old_board[r][c] = 0;
 
-	while (!quit) {
-		int mouse_x, mouse_y;
-		while(SDL_PollEvent(&event)){
-			switch(event.type){
-				case SDL_KEYDOWN:
-					switch(event.key.keysym.sym){
-						case SDLK_LEFT:
-							for (dim r = 0; r < BOARD_DIM; ++r)
-								for (dim c = 0; c < BOARD_DIM; ++c)
-									old_board[r][c] = game.board[r][c];
-							game_action(&game, DIRECTION_LEFT);
-							break;
-						case SDLK_RIGHT:
-							for (dim r = 0; r < BOARD_DIM; ++r)
-								for (dim c = 0; c < BOARD_DIM; ++c)
-									old_board[r][c] = game.board[r][c];
-							game_action(&game, DIRECTION_RIGHT);
-							break;
-						case SDLK_UP:
-							for (dim r = 0; r < BOARD_DIM; ++r)
-								for (dim c = 0; c < BOARD_DIM; ++c)
-									old_board[r][c] = game.board[r][c];
-							game_action(&game, DIRECTION_UP);
-							break;
-						case SDLK_DOWN:
-							for (dim r = 0; r < BOARD_DIM; ++r)
-								for (dim c = 0; c < BOARD_DIM; ++c)
-									old_board[r][c] = game.board[r][c];
-							game_action(&game, DIRECTION_DOWN);
-							break;
-						case SDLK_n:
-							game_initialize(&game);
-							animate_clear();
-							for (dim r = 0; r < BOARD_DIM; ++r)
-								for (dim c = 0; c < BOARD_DIM; ++c)
-									old_board[r][c] = 0;
-							break;
-						case SDLK_q:
-							quit = true;
-							break;
-						case SDLK_d:
-							game.board[0][0] *= 2;
-							break;
-						case SDLK_f:
-							board_insert(game.board, &game.delta);
-							break;
-						default:
-								break;
-					}
-				case SDL_KEYUP:
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_LEFT)
-						mouse_down = true;
-					break;
-				case SDL_MOUSEBUTTONUP:
-					if (event.button.button == SDL_BUTTON_LEFT)
-						mouse_down = false;
-					break;
-				case SDL_QUIT:
-					quit = true;
-					break;
-				default:
-					break;
-			}
-		}
-		if (!mouse_down) {
-			button_handle_clicks(&game);
-		} else {
-			dim r, c;
-			pos_to_dim(mouse_x, mouse_y, &r, &c);
-			if (r < BOARD_DIM && c < BOARD_DIM) {
-				if (game.board[r][c] == 0)
-					game.board[r][c] = 2;
-				else
-					game.board[r][c] *= 2;
-			}
-			SDL_Delay(100);
-		}
+	while (game.state != STATE_QUIT) {
+
+		// if (!mouse_down) {
+		// 	button_handle_clicks(&game);
+		// } else {
+		// 	dim r, c;
+		// 	pos_to_dim(mouse_x, mouse_y, &r, &c);
+		// 	if (r < BOARD_DIM && c < BOARD_DIM) {
+		// 		if (game.board[r][c] == 0)
+		// 			game.board[r][c] = 2;
+		// 		else
+		// 			game.board[r][c] *= 2;
+		// 	}
+		// 	SDL_Delay(100);
+		// }
 		SDL_RenderClear(ren);
 		draw_header(ren, game.state, game.score);
 		draw_board(ren);
-		draw_buttons(ren, mouse_x, mouse_y, mouse_down);
-		last_frame = current_frame;
-		current_frame = SDL_GetPerformanceCounter();
-		delta_millis = (double) ((current_frame - last_frame) * 1000 /
-									 (double) SDL_GetPerformanceFrequency());
-		if (!animate_board(ren, delta_millis, game.board, old_board, &game.delta)) {
+		draw_buttons(ren, mouse.x, mouse.y, mouse.lmb);
+		
+		if (!animate_board(ren, game_time.delta, game.board, old_board, &game.delta)) {
 			draw_cells(ren, game.board, 1);
 		}
 
-		SDL_GetMouseState(&mouse_x, &mouse_y);
-		SDL_RenderPresent(ren);
+		window_render();
 	}
 
-
-	SDL_DestroyRenderer(ren);
-	SDL_DestroyWindow(win);
-	SDL_Quit();
-
-	font_close();
-	atexit(TTF_Quit);
+	window_close();
 
 	return 0;
 }
