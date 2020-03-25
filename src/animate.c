@@ -1,26 +1,4 @@
-#ifndef HEADER_LOGIC
-  #define HEADER_LOGIC
-  #include "2048.h"
-#endif
-
-#ifndef HEADER_DRAW
-  #define HEADER_DRAW
-  #include "draw.h"
-#endif
-
-#ifndef HEADER_ANIMATIONS
-  #define HEADER_ANIMATIONS
-  #include "animate.h"
-#endif
-
-translation_cell move[BUFFER_SIZE];
-scale_cell insert[BUFFER_SIZE];
-scale_cell add[BUFFER_SIZE];
-dim move_len = 0, add_len = 0, insert_len = 0,
-    move_first = 0, add_first = 0, insert_first = 0;
-
-game_board board_render;
-bool board_move_keep[BOARD_DIM][BOARD_DIM];
+#include "animate.h"
 
 void animate_clear() {
   move_len = 0;

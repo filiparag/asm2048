@@ -1,4 +1,7 @@
-#include<math.h>
+#ifndef _ANIMATE_
+#define _ANIMATE_
+
+#include <math.h>
 #include "draw.h"
 
 #define ANIMATION_TIME 200
@@ -42,3 +45,84 @@ typedef struct {
   double scale;
   double elapsed_time;
 } scale_cell;
+
+translation_cell move[BUFFER_SIZE];
+scale_cell insert[BUFFER_SIZE];
+scale_cell add[BUFFER_SIZE];
+dim move_len = 0, add_len = 0, insert_len = 0,
+    move_first = 0, add_first = 0, insert_first = 0;
+
+game_board board_render;
+bool board_move_keep[BOARD_DIM][BOARD_DIM];
+
+void animate_clear();
+
+void animate_flush_completed();
+
+void debug(
+	SDL_Renderer* ren,
+  const double v, const pos p
+);
+
+double transition(
+	const double curr, const double max,
+  const double strenght,
+  const transition_type type
+);
+
+void move_append(
+	const board_cell_pair cells[],
+ const dim len
+);
+
+void insert_append(
+	const board_cell cells[],
+   const dim len
+);
+
+void add_append(
+	const board_cell cells[],
+  const dim len
+);
+
+void move_update(
+	const double delta_time
+);
+
+void insert_update(
+	const double delta_time
+);
+
+void add_update(
+	const double delta_time
+);
+
+void move_render(
+	SDL_Renderer* ren
+);
+
+void insert_render(
+	SDL_Renderer* ren
+);
+
+void add_render(
+	SDL_Renderer* ren
+);
+
+void board_unchanged(
+	game_board new, game_board old
+);
+
+void board_copy(
+	game_board board
+);
+
+bool animate_board(
+	SDL_Renderer* ren,
+  const double delta_time,
+  game_board board, game_board board_old,
+  board_change* change
+);
+
+
+#endif
