@@ -1,4 +1,7 @@
+.*
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
 Makefile
+build
+2048

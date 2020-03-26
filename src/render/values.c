@@ -1,10 +1,5 @@
-#pragma once
-
 #include <SDL2/SDL_ttf.h>
 #include "types.h"
-
-#define FONT_NAME "assets/fonts/ClearSans-Medium.ttf"
-#define FONT_PT_SIZE 90
 
 const SDL_Color cell_colors[] = {
   {201, 187, 178, 255},

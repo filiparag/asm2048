@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #define VALUE_COLORS_COUNT 12
 
@@ -18,6 +19,9 @@
 #define BTN_NAME_LENGTH 32
 
 #define BUTTON_ACTION_COUNT 1
+
+#define FONT_NAME "assets/fonts/ClearSans-Medium.ttf"
+#define FONT_PT_SIZE 90
 
 typedef uint32_t pos;
 
@@ -45,3 +49,9 @@ typedef struct {
   SDL_Color color;
   button_action action;
 } button;
+
+extern const SDL_Color cell_colors[VALUE_COLORS_COUNT];
+extern const button buttons[BUTTON_ACTION_COUNT];
+
+TTF_Font* font;
+Uint8 button_buffer_length;

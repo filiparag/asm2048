@@ -44,6 +44,13 @@ int main(int argc, char *argv[]) {
 		// 	}
 		// 	SDL_Delay(100);
 		// }
+
+		for (dim r = 0; r < BOARD_DIM; ++r)
+			for (dim c = 0; c < BOARD_DIM; ++c)
+				old_board[r][c] = game.board[r][c];
+
+		game_tick(&game, true);
+
 		SDL_RenderClear(ren);
 		draw_header(ren, game.state, game.score);
 		draw_board(ren);
