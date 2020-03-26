@@ -7,7 +7,7 @@ project(2048)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 # Add all C source files under the src directory
-file(GLOB SOURCES "src/*.c")
+file(GLOB_RECURSE SOURCES "src/*.c")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Debug symbols
@@ -18,7 +18,7 @@ set(CMAKE_BUILD_TYPE Debug)
 # Add compiler errors/warnings flags
 target_compile_options(${PROJECT_NAME} PRIVATE 
   -std=c18 -Wall -pedantic -Werror -Wshadow 
-  -Wstrict-aliasing -Wstrict-overflow -lm
+  -Wstrict-aliasing -Wstrict-overflow -lm -ldl
   -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function
 )
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h>
+#include "types.h"
 #include "draw.h"
 
 #define ANIMATION_TIME 200
@@ -48,8 +49,7 @@ typedef struct {
 translation_cell move[BUFFER_SIZE];
 scale_cell insert[BUFFER_SIZE];
 scale_cell add[BUFFER_SIZE];
-dim move_len = 0, add_len = 0, insert_len = 0,
-    move_first = 0, add_first = 0, insert_first = 0;
+dim move_len, add_len, insert_len;
 
 game_board board_render;
 bool board_move_keep[BOARD_DIM][BOARD_DIM];

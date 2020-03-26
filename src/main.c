@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "window.h"
-#include "2048.h"
-#include "game.h"
-#include "draw.h"
-#include "buttons.h"
-#include "animate.h"
+#include "window/window.h"
+#include "game/types.h"
+#include "game/2048.h"
+#include "control/game.h"
+#include "render/draw.h"
+#include "render/buttons.h"
+#include "render/animate.h"
 
 int main(int argc, char *argv[]) {
 	
@@ -21,6 +22,7 @@ int main(int argc, char *argv[]) {
 	srand(time(NULL));
   game_store game = {STATE_LOST};
   game_initialize(&game);
+	game_init();
 
 	game_board old_board;
 	for (dim r = 0; r < BOARD_DIM; ++r)

@@ -1,8 +1,16 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include "2048.h"
-#include "draw.h"
+
+#define VALUE_COLORS_COUNT 12
+
+#define BOARD_SIZE 512
+#define HEADER_SIZE 128
+#define BOARD_PADDING 24
+
+#define CELL_SIZE (BOARD_SIZE - BOARD_PADDING * (BOARD_DIM + 1)) / BOARD_DIM
+#define CELL_PADDING CELL_SIZE / 6
+#define CELL_BORDER_RAD 5
 
 #define BTN_PADDING 5
 #define BTN_BORDER_RAD 3
@@ -10,6 +18,15 @@
 #define BTN_NAME_LENGTH 32
 
 #define BUTTON_ACTION_COUNT 1
+
+typedef uint32_t pos;
+
+typedef enum {
+  ALIGN_NONE,
+  ALIGN_LEFT,
+  ALIGN_MIDDLE,
+  ALIGN_RIGHT
+} text_align;
 
 typedef enum {
   BTN_NORMAL,
@@ -28,25 +45,3 @@ typedef struct {
   SDL_Color color;
   button_action action;
 } button;
-
-const button buttons[] = {
-  {
-    "New game",
-    ALIGN_MIDDLE,
-    BOARD_SIZE - BOARD_PADDING - 100, BOARD_PADDING,
-    100, 30,
-    {117, 167, 241},
-    ACTION_NEW_GAME
-  }
-};
-
-bool button_buffer[BUTTON_ACTION_COUNT];
-Uint8 button_buffer_length = 0;
-
-void button_click(
-  const button_action action
-);
-
-void button_handle_clicks(
-  game_store* game
-);

@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
-#include "draw.h"
+#include "../render/draw.h"
 
 SDL_Window* win;
 SDL_Renderer* ren;

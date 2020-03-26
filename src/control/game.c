@@ -99,3 +99,11 @@ void game_tick(game_store* game, bool input_enabled) {
   if (input_enabled && !mouse.lmb)
     button_handle_clicks(game);
 }
+
+void game_init() {
+  time_update();
+  mouse = (mouse_state) {
+    .x = 0, .y = 0,
+    .lmb = false, .rmb = false
+  };
+}

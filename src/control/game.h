@@ -1,9 +1,9 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include "2048.h"
-#include "animate.h"
-#include "buttons.h"
+#include "../game/2048.h"
+#include "../render/animate.h"
+#include "../render/buttons.h"
 
 typedef struct {
   int x, y;
@@ -15,12 +15,9 @@ typedef struct {
   double delta;
 } time_state;
 
-mouse_state mouse = {
-  .x = 0, .y = 0,
-  .lmb = false, .rmb = false
-};
+mouse_state mouse;
 
-time_state game_time = {0};
+time_state game_time;
 
 void time_update();
 
@@ -43,3 +40,5 @@ void handle_input(
 void game_tick(
   game_store* game, bool input_enabled
 );
+
+void game_init();
