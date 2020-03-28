@@ -114,7 +114,7 @@ void animate_flush_completed() {
 void debug(SDL_Renderer* ren,
            const double v, const pos p) {
   static char v_string[24];
-  sprintf(v_string, "%5.5f", v);
+  sprintf(v_string, "%4.2f", v);
   draw_text(
     ren, v_string, BOARD_SIZE / 2, BOARD_PADDING + 25 * p,
     0, 25, (SDL_Color){0,0,0}, ALIGN_LEFT
@@ -217,6 +217,7 @@ void add_append(const board_cell cells[],
     board_render[cells[i].row][cells[i].col] = 0;
   }
 }
+
 void move_update(const double delta_time) {
   for (dim i = 0; i < move_len; ++i) {
     if (move[i].elapsed_time >= ANIM_MOVE_DELAY) {
@@ -346,7 +347,7 @@ void board_copy(game_board board) {
 bool animate_board(SDL_Renderer* ren,
                    const double delta_time,
                    game_board board, game_board board_old,
-                   board_change* change) {
+                   board_delta* delta) {
 
   if (
     move_len == 0 &&
@@ -354,9 +355,9 @@ bool animate_board(SDL_Renderer* ren,
     add_len == 0
   ) {
     if (
-      change->move_len == 0 &&
-      change->insert_len == 0 &&
-      change->add_len == 0
+      delta->move_len == 0 &&
+      delta->insert_len == 0 &&
+      delta->add_len == 0
     )
       return false;
     else
@@ -367,11 +368,11 @@ bool animate_board(SDL_Renderer* ren,
 
   animate_flush_completed();
 
-  move_append(change->move, change->move_len);
-  add_append(change->add, change->add_len);
-  insert_append(change->insert, change->insert_len);
+  move_append(delta->move, delta->move_len);
+  add_append(delta->add, delta->add_len);
+  insert_append(delta->insert, delta->insert_len);
 
-  delta_clear(change);
+  delta_clear(delta);
   
   move_update(delta_time);
   add_update(delta_time);

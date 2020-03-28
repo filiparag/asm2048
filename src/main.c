@@ -31,20 +31,6 @@ int main(int argc, char *argv[]) {
 
 	while (game.state != STATE_QUIT) {
 
-		// if (!mouse_down) {
-		// 	button_handle_clicks(&game);
-		// } else {
-		// 	dim r, c;
-		// 	pos_to_dim(mouse_x, mouse_y, &r, &c);
-		// 	if (r < BOARD_DIM && c < BOARD_DIM) {
-		// 		if (game.board[r][c] == 0)
-		// 			game.board[r][c] = 2;
-		// 		else
-		// 			game.board[r][c] *= 2;
-		// 	}
-		// 	SDL_Delay(100);
-		// }
-
 		for (dim r = 0; r < BOARD_DIM; ++r)
 			for (dim c = 0; c < BOARD_DIM; ++c)
 				old_board[r][c] = game.board[r][c];
@@ -55,6 +41,29 @@ int main(int argc, char *argv[]) {
 		draw_header(ren, game.state, game.score);
 		draw_board(ren);
 		draw_buttons(ren, mouse.x, mouse.y, mouse.lmb);
+
+		dim rm, cm;
+		pos_to_dim(mouse.x, mouse.y, &rm, &cm);
+		if (rm < BOARD_DIM && cm < BOARD_DIM) {
+			debug(ren, rm, 1);
+			debug(ren, cm, 2);
+		}
+
+		if (mouse.lmb) {
+			if (game.board[rm][cm] == 0)
+				game.board[rm][cm] = 2;
+			else
+				game.board[rm][cm] *= 2;
+			SDL_Delay(100);
+		}
+
+		if (mouse.rmb) {
+			if (game.board[rm][cm] == 2)
+				game.board[rm][cm] = 0;
+			else
+				game.board[rm][cm] /= 2;
+			SDL_Delay(100);
+		}
 		
 		if (!animate_board(ren, game_time.delta, game.board, old_board, &game.delta)) {
 			draw_cells(ren, game.board, 1);

@@ -38,16 +38,24 @@ typedef struct {
   board_cell dest;
 } board_cell_pair;
 
+// typedef struct {
+//   board_cell_pair move[2 * BOARD_DIM * BOARD_DIM];
+//   board_cell insert[2 * BOARD_DIM * BOARD_DIM];
+//   board_cell add[2 * BOARD_DIM * BOARD_DIM];
+//   dim move_len, insert_len, add_len;
+// } board_change;
+
 typedef struct {
-  board_cell_pair move [2 * BOARD_DIM * BOARD_DIM];
-  board_cell insert [2 * BOARD_DIM * BOARD_DIM];
-  board_cell add [2 * BOARD_DIM * BOARD_DIM];
-  dim move_len, insert_len, add_len;
-} board_change;
+  board_cell insert[BOARD_DIM * BOARD_DIM];
+  board_cell add[BOARD_DIM * BOARD_DIM];
+  board_cell_pair move[BOARD_DIM * BOARD_DIM];
+  dim insert_len, add_len, move_len;
+  bool add_moved[BOARD_DIM * BOARD_DIM];
+} board_delta;
 
 typedef struct {
   game_state state;
   game_board board;
   val score;
-  board_change delta;
+  board_delta delta;
 } game_store;

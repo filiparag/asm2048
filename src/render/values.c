@@ -26,6 +26,14 @@ const button buttons[] = {
     100, 30,
     {117, 167, 241},
     ACTION_NEW_GAME
+  },
+  {
+    "Undo",
+    ALIGN_MIDDLE,
+    BOARD_SIZE - BOARD_PADDING - 100, BOARD_PADDING + 45,
+    100, 30,
+    {243, 177, 120},
+    ACTION_NEW_GAME
   }
 };
 

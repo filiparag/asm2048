@@ -39,32 +39,41 @@ bool board_move_next(
 );
 
 void delta_move(
-	board_change* change, const val value,
+	board_delta* delta, game_board board,
   const dim ro, const dim co,
   const dim rd, const dim cd,
   const bool merge
 );
 
+bool delta_add_move(
+	board_delta* delta,
+  const dim ro, const dim co,
+  const dim rd, const dim cd
+);
+
 void delta_add(
-	board_change* change, const val value,
+	board_delta* delta,
+  const val value,
   const dim row, const dim col
 );
 
 void delta_insert(
-	board_change* change, const val value,
+	board_delta* delta, const val value,
   const dim row, const dim col
 );
 
 void delta_clear(
-	board_change* change
+	board_delta* delta
 );
 
 val board_add(
-	game_board board, const direction dir
+	game_board board, const direction dir,
+	board_delta* delta
 );
 
 bool board_move(
-	game_board board, const direction dir
+	game_board board, const direction dir,
+	board_delta* delta, const bool merge
 );
 
 val random_value();
@@ -73,8 +82,12 @@ dim random_cell(
 	const dim count
 );
 
+dim board_empty(
+	game_board board, board_cell empty[]
+);
+
 bool board_insert(
-	game_board board, board_change* change
+	game_board board, board_delta* delta
 );
 
 void board_clear(

@@ -18,7 +18,7 @@
 #define BTN_COLOR_DELTA 30
 #define BTN_NAME_LENGTH 32
 
-#define BUTTON_ACTION_COUNT 1
+#define BUTTON_ACTION_COUNT 2
 
 #define FONT_NAME "assets/fonts/ClearSans-Medium.ttf"
 #define FONT_PT_SIZE 90
