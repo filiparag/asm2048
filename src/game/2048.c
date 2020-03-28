@@ -78,95 +78,118 @@ void delta_clear(board_change* change) {
   change->insert_len = 0;
 }
 
-val rows_add(game_board board, const direction dir,
-             board_change* change) {
+void index_cell(const direction dir,
+                const dim a, const dim b,
+                dim* r, dim* c, dim* r_next, dim* c_next) {
+  switch (dir) {
+    case DIRECTION_UP:
+      *r = b;
+      *c = a;
+      *r_next = b + 1;
+      *c_next = a;
+      break;
+    case DIRECTION_DOWN:
+      *r = b;
+      *c = a;
+      *r_next = b - 1;
+      *c_next = a;
+      break;
+    case DIRECTION_LEFT:
+      *r = a;
+      *c = b;
+      *r_next = a;
+      *c_next = b + 1;
+      break;
+    case DIRECTION_RIGHT:
+      *r = a;
+      *c = b;
+      *r_next = a;
+      *c_next = b - 1;
+      break;
+  }
+}
+
+bool board_move_continue(const val cell,
+                         const direction dir,
+                         const dim r_next, const dim c_next) {
+  if (cell != 0)
+    return false;
+  switch (dir) {
+    case DIRECTION_UP:
+      return r_next + 0 != BOARD_DIM - 0;
+    case DIRECTION_DOWN:
+      return r_next + 1 != 0;
+    case DIRECTION_LEFT:
+      return c_next + 0 != BOARD_DIM - 0;
+    case DIRECTION_RIGHT:
+      return c_next + 1 != 0;
+    default:
+      return false;
+  }
+}
+
+bool board_move_next(const direction dir,
+                     dim* r_next, dim* c_next) {
+  switch (dir) {
+    case DIRECTION_UP:
+      *r_next += 1;
+      break;
+    case DIRECTION_DOWN:
+      *r_next -= 1;
+      break;
+    case DIRECTION_LEFT:
+      *c_next += 1;
+      break;
+    case DIRECTION_RIGHT:
+      *c_next -= 1;
+      break;
+  }
+  return *r_next < BOARD_DIM && 
+         *c_next < BOARD_DIM;
+}
+
+val board_add(game_board board, const direction dir) {
   val score = 0;
   const dim first = index_first(dir, 1);
   const dim last = index_last(dir, 1);
   const sdim next = index_next(dir);
-  for (dim c = 0; c < BOARD_DIM; ++c)
-    for (dim r = first; r != last; r += next)
+  for (dim a = 0; a < BOARD_DIM; ++a)
+    for (dim b = first; b != last; b += next) {
+      dim r, c, r_next, c_next;
+      index_cell(dir, a, b, &r, &c, &r_next, &c_next);
       if (
         board[r][c] != 0 &&
-        board[r][c] == board[r+next][c]
+        board[r][c] == board[r_next][c_next]
       ) {
-        if (change != NULL) {
-          delta_move(change, board[r][c], r+next, c, r, c, true);
-          delta_add(change, board[r][c] * 2, r, c);
-        }
-        board[r][c] *= 2;
-        board[r+next][c] = 0;
+        board[r][c] <<= 1;
+        board[r_next][c_next] = 0;
         score += board[r][c];
-      }
-  return score;
-}
-
-val columns_add(game_board board, const direction dir,
-                board_change* change) {
-  val score = 0;
-  const dim first = index_first(dir, 1);
-  const dim last = index_last(dir, 1);
-  const sdim next = index_next(dir);
-  for (dim r = 0; r < BOARD_DIM; ++r)
-    for (dim c = first; c != last; c += next)
-      if (
-        board[r][c] != 0 &&
-        board[r][c] == board[r][c+next]
-      ) {
-        if (change != NULL) {
-          delta_move(change, board[r][c], r, c+next, r, c, true);
-          delta_add(change, board[r][c] * 2, r, c);
-        }
-        board[r][c] *= 2;
-        board[r][c+next] = 0;
-        score += board[r][c];
-      }
-  return score;
-}
-
-bool rows_move(game_board board, const direction dir,
-               board_change* change) {
-  bool moved = false;
-  dim border = (dir == DIRECTION_UP) ? 0 : 1;
-  const dim first = index_first(dir, border);
-  const dim last = index_last(dir, 0);
-  const sdim next = index_next(dir);
-  for (dim c = 0; c < BOARD_DIM; ++c)
-    for (dim r = first; r != last; r += next) {
-      sdim r_next = r + next;
-      while (board[r][c] == 0 && r_next + border != last) {
-        if (board[r_next][c] != 0) {
-          board[r][c] = board[r_next][c];
-          board[r_next][c] = 0;
-          moved = true;
-          if (change != NULL)
-            delta_move(change, board[r][c], r_next, c, r, c, false);
-        }
-        r_next += next;
       }
     }
-  return moved;
+  return score;
 }
 
-bool columns_move(game_board board, const direction dir,
-                  board_change* change) {
+bool board_move(game_board board, const direction dir) {
   bool moved = false;
-  dim border = (dir == DIRECTION_LEFT) ? 0 : 1;
+  const dim border = 
+    (dir == DIRECTION_UP || dir == DIRECTION_LEFT) ? 0 : 1;
   const dim first = index_first(dir, border);
   const dim last = index_last(dir, 0);
   const sdim next = index_next(dir);
-  for (dim r = 0; r < BOARD_DIM; ++r)
-    for (dim c = first; c != last; c += next) {
-      sdim c_next = c + next;
-      while (board[r][c] == 0 && c_next + border != last) {
-        if (board[r][c_next] != 0) {
-          board[r][c] = board[r][c_next];
-          board[r][c_next] = 0;
+  for (dim a = 0; a < BOARD_DIM; ++a)
+    for (dim b = first; b != last; b += next) {
+      dim r, c, r_next, c_next;
+      index_cell(dir, a, b, &r, &c, &r_next, &c_next);
+      while (board_move_continue(
+        board[r][c], dir, r_next, c_next
+      )) {
+        if (board[r_next][c_next] != 0) {
+          board[r][c] = board[r_next][c_next];
+          board[r_next][c_next] = 0;
           moved = true;
-          if (change != NULL)
-            delta_move(change, board[r][c], r, c_next, r, c, false);
         }
-        c_next += next;
+        if (!board_move_next(dir, &r_next, &c_next))
+          break;
       }
     }
   return moved;
@@ -229,10 +252,10 @@ bool board_out_of_moves(game_board board) {
     }
   if (count < BOARD_DIM * BOARD_DIM)
     return false;
-  score += columns_add(hyp_move_board, DIRECTION_LEFT, NULL);
-  score += columns_add(hyp_move_board, DIRECTION_RIGHT, NULL);
-  score += rows_add(hyp_move_board, DIRECTION_UP, NULL);
-  score += rows_add(hyp_move_board, DIRECTION_DOWN, NULL);
+  score += board_add(hyp_move_board, DIRECTION_LEFT);
+  score += board_add(hyp_move_board, DIRECTION_RIGHT);
+  score += board_add(hyp_move_board, DIRECTION_UP);
+  score += board_add(hyp_move_board, DIRECTION_DOWN);
   return score == 0;
 }
 
@@ -251,17 +274,12 @@ void game_action(game_store *game, const direction dir) {
     return;
   bool moved = false;
   delta_clear(&game->delta);
-  if (dir == DIRECTION_LEFT || dir == DIRECTION_RIGHT) {
-    moved |= columns_move(game->board, dir, &game->delta);
-    game->score += columns_add(game->board, dir, &game->delta);
-    moved |= columns_move(game->board, dir, &game->delta);
-  } else {
-    moved |= rows_move(game->board, dir, &game->delta);
-    game->score += rows_add(game->board, dir, &game->delta);
-    moved |= rows_move(game->board, dir, &game->delta);
-  }
+  moved |= board_move(game->board, dir);
+  const val scored = board_add(game->board, dir);
+  moved |= board_move(game->board, dir);
   const val cell_max = board_max(game->board);
-  if (moved) {
+  game->score += scored;
+  if (moved || scored > 0) {
     if (cell_max >= 2048)
       game->state = STATE_WON;
     board_insert(game->board, &game->delta);
@@ -270,64 +288,5 @@ void game_action(game_store *game, const direction dir) {
       game->state = STATE_LOST;
     else
       game->state = STATE_OUT_OF_MOVES;
-  }
-}
-
-void play() {
-  srand(time(NULL));
-  game_store game;
-  game_initialize(&game);
-  while (true) {
-    
-    printf("Score: %9i\n\n", game.score);
-    board_print(game.board);
-    if (game.state == STATE_LOST)
-      printf("\nYou lost!\n");
-
-    printf("\n:");
-    char input;
-    scanf("%c", &input);
-    switch (input) {
-      case 'q':
-        return;
-      case 'u':
-        game_action(&game, DIRECTION_UP);
-        break;
-      case 'd':
-        game_action(&game, DIRECTION_DOWN);
-        break;
-      case 'l':
-        game_action(&game, DIRECTION_LEFT);
-        break;
-      case 'r':
-        game_action(&game, DIRECTION_RIGHT);
-        break;
-      case 'n':
-        game_initialize(&game);
-      case 'f':
-        delta_clear(&game.delta);
-        board_insert(game.board, &game.delta);
-        break;
-      default:
-        break;
-    }
-
-    printf("\n");
-    board_print(game.board);
-    printf("\n");
-
-    for (dim m = 0; m < game.delta.move_len; ++m)
-      printf(
-        "\n%5i (%i, %i) -> (%i, %i)",
-        game.delta.move[m].orig.value,
-        game.delta.move[m].orig.row,
-        game.delta.move[m].orig.col,
-        game.delta.move[m].dest.row,
-        game.delta.move[m].dest.col
-      );
-
-    scanf("\n");
-    printf("\x1B[1;1H\x1B[2J");
-    
   }
 }

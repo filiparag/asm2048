@@ -11,8 +11,8 @@ file(GLOB_RECURSE SOURCES "src/*.c")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Debug symbols
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE RelWithDebInfo)
 # set(CMAKE_BUILD_TYPE Release)
 
 # Add compiler errors/warnings flags

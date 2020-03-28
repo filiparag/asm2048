@@ -21,6 +21,23 @@ sdim index_next(
 	const direction dir
 );
 
+void index_cell(
+	const direction dir,
+  const dim a, const dim b,
+  dim* r, dim* c, dim* r_next, dim* c_next
+);
+
+bool board_move_continue(
+	const val cell,
+  const direction dir,
+  const dim r_next, const dim c_next
+);
+
+bool board_move_next(
+	const direction dir,
+  dim* r_next, dim* c_next
+);
+
 void delta_move(
 	board_change* change, const val value,
   const dim ro, const dim co,
@@ -42,24 +59,12 @@ void delta_clear(
 	board_change* change
 );
 
-val rows_add(
-	game_board board, const direction dir,
-  board_change* change
+val board_add(
+	game_board board, const direction dir
 );
 
-val columns_add(
-	game_board board, const direction dir,
-  board_change* change
-);
-
-bool rows_move(
-	game_board board, const direction dir,
-  board_change* change
-);
-
-bool columns_move(
-	game_board board, const direction dir,
-  board_change* change
+bool board_move(
+	game_board board, const direction dir
 );
 
 val random_value();
@@ -91,5 +96,3 @@ void game_initialize(
 void game_action(
 	game_store *game, const direction dir
 );
-
-void game_play_console();
