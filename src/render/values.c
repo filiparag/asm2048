@@ -33,7 +33,7 @@ const button buttons[] = {
     BOARD_SIZE - BOARD_PADDING - 100, BOARD_PADDING + 45,
     100, 30,
     {243, 177, 120},
-    ACTION_NEW_GAME
+    ACTION_UNDO_MOVE
   }
 };
 

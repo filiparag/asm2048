@@ -53,11 +53,11 @@ void delta_move(board_delta* delta, game_board board,
                 const dim ro, const dim co,
                 const dim rd, const dim cd,
                 const bool merge) {
+  printf("> Move %i (%i %i) (%i %i)\n", board[ro][co], ro, co, rd, cd);
   if (delta == NULL)
     return;
   bool merged = false;
   if (merge) {
-    printf("Merge (%i %i) (%i %i)\n", ro, co, rd, cd);
     if (delta_add_move(delta, ro, co, rd, cd))
       return;
     for (dim i = 0; i < delta->move_len; ++i) {
@@ -66,6 +66,7 @@ void delta_move(board_delta* delta, game_board board,
         delta->move[i].dest.col == co &&
         delta->move[i].orig.value == board[ro][co]
       ) {
+        printf("Merge (%i %i) (%i %i)\n", ro, co, rd, cd);
         delta->move[i].dest.row = rd;
         delta->move[i].dest.col = cd;
         delta->move[i].dest.value = board[rd][cd];

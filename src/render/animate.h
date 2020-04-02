@@ -4,7 +4,7 @@
 #include "types.h"
 #include "draw.h"
 
-#define ANIMATION_TIME 250
+#define ANIMATION_TIME 500
 
 #define BUFFER_SIZE 2 * BOARD_DIM * BOARD_DIM
 
@@ -112,9 +112,11 @@ void board_unchanged(
 	game_board new, game_board old
 );
 
-void board_copy(
+void board_snapshot(
 	game_board board
 );
+
+bool animate_in_progress();
 
 bool animate_board(
 	SDL_Renderer* ren,

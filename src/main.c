@@ -7,41 +7,24 @@
 #include "game/types.h"
 #include "game/2048.h"
 #include "control/game.h"
+#include "control/buttons.h"
 #include "render/draw.h"
-#include "render/buttons.h"
 #include "render/animate.h"
 
 int main(int argc, char *argv[]) {
-	
-	// game_play_console();
-	// return 0;
 
 	if (!window_init())
 		return EXIT_FAILURE;
-
-	srand(time(NULL));
-  game_store game = {STATE_LOST};
-  game_initialize(&game);
+ 
 	game_init();
 
-	game_board old_board;
-	for (dim r = 0; r < BOARD_DIM; ++r)
-		for (dim c = 0; c < BOARD_DIM; ++c)
-			old_board[r][c] = 0;
+	while (!game_end()) {
 
-	while (game.state != STATE_QUIT) {
+		game_tick(!animate_in_progress());
+		
+		game_render(ren);
 
-		for (dim r = 0; r < BOARD_DIM; ++r)
-			for (dim c = 0; c < BOARD_DIM; ++c)
-				old_board[r][c] = game.board[r][c];
-
-		game_tick(&game, true);
-
-		SDL_RenderClear(ren);
-		draw_header(ren, game.state, game.score);
-		draw_board(ren);
-		draw_buttons(ren, mouse.x, mouse.y, mouse.lmb);
-
+		// cheats
 		dim rm, cm;
 		pos_to_dim(mouse.x, mouse.y, &rm, &cm);
 		if (rm < BOARD_DIM && cm < BOARD_DIM) {
@@ -64,10 +47,7 @@ int main(int argc, char *argv[]) {
 				game.board[rm][cm] /= 2;
 			SDL_Delay(100);
 		}
-		
-		if (!animate_board(ren, game_time.delta, game.board, old_board, &game.delta)) {
-			draw_cells(ren, game.board, 1);
-		}
+		// cheats
 
 		window_render();
 	}

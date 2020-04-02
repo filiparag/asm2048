@@ -39,7 +39,8 @@ typedef enum {
 } button_state;
 
 typedef enum {
-  ACTION_NEW_GAME
+  ACTION_NEW_GAME,
+  ACTION_UNDO_MOVE
 } button_action;
 
 typedef struct {

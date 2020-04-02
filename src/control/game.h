@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include "../game/2048.h"
 #include "../render/animate.h"
-#include "../render/buttons.h"
+#include "buttons.h"
 
 typedef struct {
   int x, y;
@@ -19,26 +19,44 @@ mouse_state mouse;
 
 time_state game_time;
 
+game_store game;
+
+game_board board_last;
+
 void time_update();
 
+void board_copy(
+  game_board source, game_board target
+);
+
+void board_zeros(
+  game_board board
+);
+
 void event_key_down(
-  game_store* game, SDL_Keycode key
+ SDL_Keycode key
 );
 
 void event_mouse_down(
-  game_store* game, Uint8 btn
+  Uint8 btn
 );
 
 void event_mouse_up(
-  game_store* game, Uint8 btn
+  Uint8 btn
 );
 
 void handle_input(
-  game_store* game, bool input_enabled
+  bool input_enabled
 );
 
 void game_tick(
-  game_store* game, bool input_enabled
+  bool input_enabled
+);
+
+void game_render(
+  SDL_Renderer* ren
 );
 
 void game_init();
+
+bool game_end();

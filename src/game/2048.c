@@ -16,6 +16,9 @@ void game_action(game_store *game, const direction dir) {
     game->state == STATE_OUT_OF_MOVES
   )
     return;
+
+  printf("\x1B[1;1H\x1B[2J");
+
   bool moved = false;
   delta_clear(&game->delta);
   moved |= board_move(game->board, dir, &game->delta, false);
@@ -24,7 +27,6 @@ void game_action(game_store *game, const direction dir) {
   const val cell_max = board_max(game->board);
   game->score += scored;
 
-  printf("\x1B[1;1H\x1B[2J");
   if (game->delta.move_len > 0)
     printf("Move:\n");
   for (dim i = 0; i < game->delta.move_len; ++i)
@@ -48,20 +50,21 @@ void game_action(game_store *game, const direction dir) {
       game->delta.add[i].col
     );
 
-  if (game->delta.insert_len > 0)
-    printf("\nInsert:\n");
-  for (dim i = 0; i < game->delta.insert_len; ++i)
-    printf(
-      "%4i (%i, %i)\n",
-      game->delta.insert[i].value,
-      game->delta.insert[i].row,
-      game->delta.insert[i].col
-    );
-
   if (moved || scored > 0) {
     if (cell_max >= 2048)
       game->state = STATE_WON;
     board_insert(game->board, &game->delta);
+
+    if (game->delta.insert_len > 0)
+      printf("\nInsert:\n");
+    for (dim i = 0; i < game->delta.insert_len; ++i)
+      printf(
+        "%4i (%i, %i)\n",
+        game->delta.insert[i].value,
+        game->delta.insert[i].row,
+        game->delta.insert[i].col
+      );
+
   } else if (!moved && board_out_of_moves(game->board)) {
     if (cell_max < 2048)
       game->state = STATE_LOST;

@@ -7,7 +7,7 @@
 #include "../game/2048.h"
 #include "types.h"
 #include "values.h"
-#include "buttons.h"
+#include "../control/buttons.h"
 
 typedef struct {
   SDL_Texture* texture;
