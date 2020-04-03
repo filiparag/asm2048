@@ -6,7 +6,7 @@ dim = BOARD_DIM
 
 board_max_asm:
 
-  movq    %rdi, %rdx          // board matrix address to %rax
+  movq    %rdi, %rdx          // board matrix address to %rdx
   movq    $dim*dim, %rcx      // number of cells
   movq    $0, %rax            // maximum value
 
