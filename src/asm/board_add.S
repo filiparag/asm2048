@@ -54,8 +54,10 @@ board_add_asm:
   loop:
     subq    $4, %rsp        // local variables: r, c, r_next, c_next
 
+    pushq   %rcx            // stash loop counter
+
     movl    -12(%rbp), %edi // call parameter: direction
-    movq    $0, %rax        // zero junk bits
+    xorq    %rax, %rax        // zero junk bits
     movb    %ch, %al
     movq    %rax, %rsi      // call parameter: a
     movb    %cl, %al
@@ -65,10 +67,60 @@ board_add_asm:
     leaq    -39(%rbp), %r9  // call parameter: r_next
     leaq    -40(%rbp), %rax 
     pushq   %rax            // call parameter: c_next
-    call    index_next
+    call    index_cell
     addq    $8, %rsp
 
-    movq    -40(%rbp), %rax
+    
+    xorq    %rax, %rax      // current board[r][c]
+    movb    -37(%rbp), %al  // row index
+    shlq    $2, %rax        // multiply row index by 4
+    addb    -38(%rbp), %al  // column index
+    shlq    $1, %rax        // double index for word size
+    movb    %al, %bl        // store board[r][c] index in %bl
+
+    movq    -8(%rbp), %rcx
+    addq    %rax, %rcx
+    movw    (%rcx), %ax    // board[r][c] to %ax
+
+    cmpw    $0, %ax        // board[r][c] == 0
+    je      continue
+    pushw   %ax            // stash value
+
+    xorq    %rax, %rax      // current board[r_next][c_next]
+    movb    -39(%rbp), %al  // row_next index
+    shlq    $2, %rax        // multiply row index by 4
+    addb    -40(%rbp), %al  // column_next index
+    shlq    $1, %rax        // double index for word size
+    movb    %al, %bh        // store board[r_next][c_next] index in %bh
+
+    movq    -8(%rbp), %rcx
+    addq    %rax, %rcx
+    movw    (%rcx), %ax     // board[r_next][c_next] to %ax
+
+    popw    %cx             // restore board[r][c] to %cx
+
+    cmpw    %ax, %cx        // board[r][c] == board[r_next][c_next]
+    jne     continue
+
+
+    movq    -24(%rbp), %rdi // call parameter: delta
+    movq    -8(%rbp), %rsi  // call parameter: board
+    movb    -39(%rbp), %dl  // call parameter: r_next
+    movb    -40(%rbp), %cl  // call parameter: c_next
+    movb    -40(%rbp), %r8b // call parameter: r
+    movb    -40(%rbp), %r9b // call parameter: c
+    pushw   $1              // call_parameter: merge
+    call    delta_move
+    addq    $2, %rsp
+    
+
+    xorq    %rax, %rax
+    movb    %bl, %al
+    jmp done
+
+  continue:
+    popq    %rcx            // restore loop counter
+    jmp inner_loop
 
   
   done:
