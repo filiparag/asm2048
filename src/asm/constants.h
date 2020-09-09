@@ -1,1 +1,0 @@
-#define BOARD_DIM 4
