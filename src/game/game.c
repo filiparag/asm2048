@@ -15,6 +15,20 @@ bool game_board_full(game_store* store) {
     return !count;
 }
 
+bool game_board_out_of_moves(game_store* store) {
+    dim moves = 0;
+    for (dim i = 0; i < store->rows; ++i)
+        for (dim j = 0; j < store->cols; ++j) {
+            if (store->board[i][j] == 0)
+                ++moves;
+            if (i  + 1 < store->rows && store->board[i][j] == store->board[i + 1][j])
+                ++moves;
+            if (j + 1 < store->cols && store->board[i][j] == store->board[i][j + 1])
+                ++moves;
+        }
+    return moves == 0;
+}
+
 void game_action_add(game_store* store, const board_action_type action, const val value, const dim rt, const dim ct, const dim r1, const dim c1, const dim r2, const dim c2) {
     store->actions[store->actions_count] = (game_action) {
         .action = action,
@@ -140,6 +154,7 @@ bool game_board_move(game_store* store, const game_move move) {
                 store->board[i1][j1] = 0;
                 store->board[i2][j2] = 0;
                 store->board[i][j] = new_value;
+                store->score += new_value;
                 moved = true;
                 board_action_add(store, store->board[i][j]/2, i, j, i1, j1, i2, j2);
             } else if ((i1 != i || j1 != j) && store->board[i1][j1] != 0) {
@@ -173,18 +188,45 @@ bool game_make_move(game_store* store, const game_move move) {
         if (store->state != WON && store->score >= WIN_SCORE)
             store->state = WON;
         if (!game_board_insert_random(store)) {
-            if (store->score < WIN_SCORE)
-                store->state = LOST;
+            if (game_board_out_of_moves(store)) {
+                if (store->state == WON)
+                    store->state = WON_END;
+                else
+                    store->state = LOST;
+            }
             return false;
         }
         return true;
-    } else
+    } else {
+        if (game_board_out_of_moves(store)) {
+            if (store->state == WON)
+                store->state = WON_END;
+            else
+                store->state = LOST;
+        }
         return false;
+    }
 }
 
 void game_print(game_store* store) {
-    printf("Score: %10u\n", store->score);
-    printf("State: %10u\n", store->state);
+    switch (store->state) {
+        case PLAYING:
+            printf("State: playing\n");
+            break;
+        case WON:
+            printf("State: won\n");
+            break;
+        case LOST:
+            printf("State: lost\n");
+            break;
+        case WON_END:
+            printf("State: won (ended)\n");
+            break;
+        case QUIT:
+            printf("State: quit\n");
+            break;
+    }
+    printf("Score: %u\n", store->score);
     printf("Board:\n");
     for (dim i = 0; i < store->rows; ++i) {
         printf("|");

@@ -6,18 +6,12 @@
 #define DIM_MIN 2
 #define DIM_MAX 16
 
-#define INSERT_POW_MAX 2
-
-#define WIN_SCORE 2048
-
-#define START_CELLS_MIN 2
-#define START_CELLS_MAX 2
-
 typedef enum {
-    PLAYING = 0,
-    LOST = 1,
+    QUIT = 0,
+    PLAYING = 1,
     WON = 2,
-    QUIT = 3
+    LOST = 3,
+    WON_END = 4
 } game_state;
 
 typedef enum {

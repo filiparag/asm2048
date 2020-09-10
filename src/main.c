@@ -31,6 +31,18 @@ int main(int argc, char *argv[]) {
 			system ("/bin/stty cooked");
 			game_print(&store);
 			system ("/bin/stty raw");
+		} else if (c == 'n') {
+			printf("\033[H\033[J");
+			game_initialize(&store, 4, 4);
+			system ("/bin/stty cooked");
+			game_print(&store);
+			system ("/bin/stty raw");
+		} else if (c == 's') {
+			printf("\033[H\033[J");
+			store.score += 100;
+			system ("/bin/stty cooked");
+			game_print(&store);
+			system ("/bin/stty raw");
 		} else if (c == '\033') { // if the first value is esc
 			getchar(); // skip the [
 			switch(getchar()) { // the real value
