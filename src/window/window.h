@@ -7,7 +7,6 @@
 #include "../game/game.h"
 #include "./time.h"
 #include "../draw/draw.h"
-#include "../draw/font.h"
 
 typedef struct {
     int x, y;

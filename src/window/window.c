@@ -30,14 +30,13 @@ bool window_init(window_store* store) {
 		SDL_Quit();
 		return false;
 	}
-    store->draw.font = NULL;
-    font_open(&store->draw);
+    SDL_RenderClear(store->render);
+    draw_initialize(&store->draw, store->render, &store->game, &store->time);
+	font_open(&store->draw);
 	if (TTF_Init() < 0) {
 		SDL_Quit();
 		return false;
 	}
-    SDL_RenderClear(store->render);
-    draw_initialize(&store->draw, store->render, &store->game, &store->time);
     game_initialize(&store->game, 4, 4);
     time_initialize(&store->time);
     control_initialize(store);
