@@ -10,6 +10,9 @@
 
 #define WIN_SCORE 2048
 
+#define START_CELLS_MIN 2
+#define START_CELLS_MAX 2
+
 typedef enum {
     PLAYING = 0,
     LOST = 1,
@@ -35,9 +38,25 @@ typedef struct {
         row_inc, col_inc;
 } board_move;
 
+typedef enum {
+    INSERT = 0,
+    MOVE = 1,
+    ADD = 2
+} board_action_type;
+
+typedef struct {
+    board_action_type action;
+    val value;
+    dim row_target, col_target,
+        row_el1, col_el1,
+        row_el2, col_el2;
+} game_action;
+
 typedef struct {
     val score;
     dim rows, cols;
     game_state state;
     game_board board;
+    dim actions_count;
+    game_action actions[DIM_MAX*DIM_MAX*3];
 } game_store;

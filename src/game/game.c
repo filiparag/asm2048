@@ -1,26 +1,59 @@
 #include "./game.h"
 
-void game_board_clear(game_board board, const dim rows, const dim cols) {
-    for (dim i = 0; i < rows; ++i)
-        for (dim j = 0; j < cols; ++j)
-            board[i][j] = 0;
+void game_board_clear(game_store* store) {
+    for (dim i = 0; i < store->rows; ++i)
+        for (dim j = 0; j < store->cols; ++j)
+            store->board[i][j] = 0;
 }
 
-bool game_board_full(game_board board, const dim rows, const dim cols) {
-    dim count = rows*cols;
-    for (dim i = 0; i < rows; ++i)
-        for (dim j = 0; j < cols; ++j)
-            if (board[i][j] > 0)
+bool game_board_full(game_store* store) {
+    dim count = store->rows * store->cols;
+    for (dim i = 0; i < store->rows; ++i)
+        for (dim j = 0; j < store->cols; ++j)
+            if (store->board[i][j] > 0)
                 --count;
     return !count;
 }
 
-bool game_board_insert_random(game_board board, const dim rows, const dim cols) {
+void game_action_add(game_store* store, const board_action_type action, const val value, const dim rt, const dim ct, const dim r1, const dim c1, const dim r2, const dim c2) {
+    store->actions[store->actions_count] = (game_action) {
+        .action = action,
+        .value = value,
+        .row_target = rt,
+        .col_target = ct,
+        .row_el1 = r1,
+        .col_el1 = c1,
+        .row_el2 = r2,
+        .col_el2 = c2
+    };
+    store->actions_count++;
+}
+
+bool game_action_undo_last(game_store* store) {
+    if (store->actions_count == 0)
+        return false;
+    store->actions_count--;
+    return true;
+}
+
+void board_action_insert(game_store* store, const val value, const dim rt, const dim ct) {
+    game_action_add(store, INSERT, value, rt, ct, -1, -1, -1, -1);
+}
+
+void board_action_move(game_store* store, const val value, const dim rt, const dim ct, const dim r1, const dim c1) {
+    game_action_add(store, MOVE, value, rt, ct, r1, c1, -1, -1);
+}
+
+void board_action_add(game_store* store, const val value, const dim rt, const dim ct, const dim r1, const dim c1, const dim r2, const dim c2) {
+    game_action_add(store, ADD, value, rt, ct, r1, c1, r2, c2);
+}
+
+bool game_board_insert_random(game_store* store) {
     dim count = 0;
     dim empty[DIM_MAX*DIM_MAX][2];
-    for (dim i = 0; i < rows; ++i)
-        for (dim j = 0; j < cols; ++j)
-            if (board[i][j] == 0) {
+    for (dim i = 0; i < store->rows; ++i)
+        for (dim j = 0; j < store->cols; ++j)
+            if (store->board[i][j] == 0) {
                 empty[count][0] = i;
                 empty[count][1] = j;
                 ++count;
@@ -29,9 +62,8 @@ bool game_board_insert_random(game_board board, const dim rows, const dim cols) 
         return false;
     dim random_cell = rand() % count;
     val random_value = 2 << rand() % INSERT_POW_MAX;
-    // val random_value = 8;
-    board[empty[random_cell][0]][empty[random_cell][1]] = random_value;
-    printf("Insrt: %1u at %2i,%2i\n", random_value, empty[random_cell][0] + 1, empty[random_cell][1] + 1);
+    store->board[empty[random_cell][0]][empty[random_cell][1]] = random_value;
+    board_action_insert(store, random_value, empty[random_cell][0], empty[random_cell][1]);
     return true;
 }
 
@@ -92,34 +124,29 @@ bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim
     return true;
 }
 
-bool game_board_move(game_board board, const dim rows, const dim cols, const game_move move, val* score) {
+bool game_board_move(game_store* store, const game_move move) {
     bool moved = false;
     board_move m;
-    game_board_move_direction(move, rows, cols, &m);
+    game_board_move_direction(move, store->rows, store->cols, &m);
     for(dim i = m.row_start; i != m.row_end; i += m.row_inc)
         for(dim j = m.col_start; j != m.col_end; j += m.col_inc) {
-            dim in = i, jn = j;
-            if (board[in][jn] == 0) {
-                while (game_board_move_next(move, &m, &in, &jn) && board[in][jn] == 0);
-                if (board[in][jn] != 0) {
-                    board[i][j] = board[in][jn];
-                    board[in][jn] = 0;
-                    moved = true;
-                    // move first non empty to current location
-                }
-            }
-            while (game_board_move_next(move, &m, &in, &jn) && board[in][jn] == 0);
-            /*if (board[i][j] == 0 && board[in][jn] != 0) {
-                board[i][j] = board[in][jn];
-                board[in][jn] = 0;
+            dim i1 = i, j1 = j; // e1 - first nonzero element
+            if (store->board[i1][j1] == 0)
+                while (game_board_move_next(move, &m, &i1, &j1) && store->board[i1][j1] == 0);
+            dim i2 = i1, j2 = j1; // e2 - first nonzero neighbour
+            while (game_board_move_next(move, &m, &i2, &j2) && store->board[i2][j2] == 0);
+            if (store->board[i1][j1] != 0 && (i1 != i2 || j1 != j2) && store->board[i1][j1] == store->board[i2][j2]) {
+                val new_value = store->board[i1][j1] << 1;
+                store->board[i1][j1] = 0;
+                store->board[i2][j2] = 0;
+                store->board[i][j] = new_value;
                 moved = true;
-            } else */
-            if (board[i][j] != 0 && board[i][j] == board[in][jn]) {
-                board[i][j] <<= 1;
-                board[in][jn] = 0;
-                *score += board[i][j];
+                board_action_add(store, store->board[i][j]/2, i, j, i1, j1, i2, j2);
+            } else if ((i1 != i || j1 != j) && store->board[i1][j1] != 0) {
+                store->board[i][j] = store->board[i1][j1];
+                store->board[i1][j1] = 0;
                 moved = true;
-                // add two cells
+                board_action_move(store, store->board[i][j], i, j, i1, j1);
             }
         }
     return moved;
@@ -130,16 +157,22 @@ void game_initialize(game_store* store, const dim rows, const dim cols) {
     store->state = PLAYING;
     store->rows = rows;
     store->cols = cols;
-    game_board_clear(store->board, rows, cols);
+    store->actions_count = 0;
+    game_board_clear(store);
+    dim start_cells = rand() % START_CELLS_MAX + 1;
+    start_cells = (start_cells < START_CELLS_MIN) ? START_CELLS_MIN : start_cells;
+    for (dim i = 0; i < start_cells; ++i)
+        game_board_insert_random(store);
 }
 
 bool game_make_move(game_store* store, const game_move move) {
     if (store->state != PLAYING && store->state != WON)
         return false;
-    if (game_board_move(store->board, store->rows, store->cols, move, &(store->score))) {
+    store->actions_count = 0;
+    if (game_board_move(store, move)) {
         if (store->state != WON && store->score >= WIN_SCORE)
             store->state = WON;
-        if (!game_board_insert_random(store->board, store->rows, store->cols)) {
+        if (!game_board_insert_random(store)) {
             if (store->score < WIN_SCORE)
                 store->state = LOST;
             return false;
@@ -161,5 +194,19 @@ void game_print(game_store* store) {
             else
                 printf("%6s |", "");
         printf("\n");
+    }
+    for (int i = 0; i < store->actions_count; ++i) {
+        game_action* a = &store->actions[i];
+        switch (a->action) {
+            case INSERT:
+                printf("Insert: %4u [%1i,%1i]\n", a->value, a->row_target + 1, a->col_target + 1);
+                break;
+            case MOVE:
+                printf("Move:   %4u [%1i,%1i] > [%1i,%1i]\n", a->value, a->row_el1 + 1, a->col_el1 + 1, a->row_target + 1, a->col_target + 1);
+                break;
+            case ADD:
+                printf("Add:    %4u [%1i,%1i] + [%1i,%1i] > [%1i,%1i]\n", a->value, a->row_el1 + 1, a->col_el1 + 1, a->row_el2 + 1, a->col_el2 + 1, a->row_target + 1, a->col_target + 1);
+                break;
+        }
     }
 }

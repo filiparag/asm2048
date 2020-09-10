@@ -12,10 +12,10 @@ int main(int argc, char *argv[]) {
 
 	game_store store;
 
-	game_initialize(&store, 4, 4);
 
 	printf("\033[H\033[J");
-	game_board_insert_random(store.board, 4, 4);
+	game_initialize(&store, 4, 4);
+	// game_board_insert_random(store.board, 4, 4);
 	game_print(&store);
 	
 	game_move move;
@@ -25,7 +25,13 @@ int main(int argc, char *argv[]) {
 	while((c=getchar())!= 'q') {
 		/* type a period to break out of the loop, since CTRL-D won't work raw */
 		// putchar(c);
-		if (c == '\033') { // if the first value is esc
+		if (c == 'i') {
+			printf("\033[H\033[J");
+			game_board_insert_random(&store);
+			system ("/bin/stty cooked");
+			game_print(&store);
+			system ("/bin/stty raw");
+		} else if (c == '\033') { // if the first value is esc
 			getchar(); // skip the [
 			switch(getchar()) { // the real value
 				case 'A':
