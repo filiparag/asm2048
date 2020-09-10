@@ -5,77 +5,24 @@
 #include <time.h>
 
 #include "game/game.h"
+#include "window/window.h"
 
 int main(int argc, char *argv[]) {
 
 	srand(time(0));
 
-	game_store store;
+	window_store store;
 
+	if (!window_init(&store))
+		return EXIT_FAILURE;
 
-	printf("\033[H\033[J");
-	game_initialize(&store, 4, 4);
-	// game_board_insert_random(store.board, 4, 4);
-	game_print(&store);
-	
-	game_move move;
-	int c;
-	/* use system call to make terminal send all keystrokes directly to stdin */
-	system ("/bin/stty raw");
-	while((c=getchar())!= 'q') {
-		/* type a period to break out of the loop, since CTRL-D won't work raw */
-		// putchar(c);
-		if (c == 'i') {
-			printf("\033[H\033[J");
-			game_board_insert_random(&store);
-			system ("/bin/stty cooked");
-			game_print(&store);
-			system ("/bin/stty raw");
-		} else if (c == 'n') {
-			printf("\033[H\033[J");
-			game_initialize(&store, 4, 4);
-			system ("/bin/stty cooked");
-			game_print(&store);
-			system ("/bin/stty raw");
-		} else if (c == 's') {
-			printf("\033[H\033[J");
-			store.score += 100;
-			system ("/bin/stty cooked");
-			game_print(&store);
-			system ("/bin/stty raw");
-		} else if (c == '\033') { // if the first value is esc
-			getchar(); // skip the [
-			switch(getchar()) { // the real value
-				case 'A':
-					// code for arrow up
-					printf("UP");
-					move = UP;
-					break;
-				case 'B':
-					// code for arrow down
-					printf("DOWN");
-					move = DOWN;
-					break;
-				case 'C':
-					// code for arrow right
-					printf("RIGHT");
-					move = RIGHT;
-					break;
-				case 'D':
-					// code for arrow left
-					printf("LEFT");
-					move = LEFT;
-					break;
-			}
-			printf("\033[H\033[J");
-			system ("/bin/stty cooked");
-			game_make_move(&store, move);
-			game_print(&store);
-			system ("/bin/stty raw");
-		}
+	while (store.game.state != QUIT) {
+		window_new_frame(&store);
+		system("clear");
+		game_print(&store.game);
 	}
-	/* use system call to set terminal behaviour to more normal behaviour */
-	system ("/bin/stty cooked");
+
+	window_close(&store);
 
 	return 0;
 }
