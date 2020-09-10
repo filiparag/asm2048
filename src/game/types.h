@@ -25,9 +25,15 @@ typedef enum {
 } game_move;
 
 typedef uint32_t val;
-typedef uint8_t dim;
+typedef int8_t dim;
 
 typedef val game_board[DIM_MAX][DIM_MAX];
+
+typedef struct {
+    dim row_start, row_end,
+        col_start, col_end,
+        row_inc, col_inc;
+} board_move;
 
 typedef struct {
     val score;
