@@ -75,7 +75,7 @@ bool game_board_insert_random(game_store* store) {
     if (count == 0)
         return false;
     dim random_cell = rand() % count;
-    val random_value = 2 << rand() % INSERT_POW_MAX;
+    val random_value = (store->base << rand() % INSERT_POW_MAX);
     store->board[empty[random_cell][0]][empty[random_cell][1]] = random_value;
     board_action_insert(store, random_value, empty[random_cell][0], empty[random_cell][1]);
     return true;
@@ -171,6 +171,8 @@ bool game_board_move(game_store* store, const game_move move, val* cell_max) {
 
 void game_initialize(game_store* store, const dim rows, const dim cols) {
     store->score = 0;
+    store->base = INSERT_BASE;
+    store->victory = WIN_CELL_MAX;
     store->state = PLAYING;
     store->rows = rows;
     store->cols = cols;
@@ -189,7 +191,7 @@ bool game_make_move(game_store* store, const game_move move) {
     store->actions_count = 0;
     val cell_max = 0;
     if (game_board_move(store, move, &cell_max)) {
-        if (store->state != WON && cell_max >= WIN_CELL_MAX)
+        if (store->state != WON && cell_max >= store->victory)
             store->state = WON;
         game_board_insert_random(store);
         moved = true;

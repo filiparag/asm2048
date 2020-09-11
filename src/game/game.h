@@ -8,12 +8,13 @@
 #define DIM_MIN 2
 #define DIM_MAX 8
 
+#define INSERT_BASE 2
 #define INSERT_POW_MAX 2
 
 #define WIN_CELL_MAX 2048
 
 #define START_CELLS_MIN 2
-#define START_CELLS_MAX 2
+#define START_CELLS_MAX 3
 
 typedef enum {
     QUIT = 0,
@@ -57,6 +58,8 @@ typedef struct {
 
 typedef struct {
     val score;
+    val base;
+    val victory;
     dim rows, cols;
     game_state state;
     game_board board;

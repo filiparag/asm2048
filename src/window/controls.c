@@ -90,15 +90,20 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                     store->control.undo_count = 0;
                     store->control.undo_current = 0;
                     store->draw.buttons[UNDO].visible = false;
-                    store->draw.buttons[NEW].visible = false;
+                    store->draw.buttons[NEW].visible = true;
                     store->draw.buttons[SIZE].visible = true;
                     break;
                 case SDLK_u:
                     control_undo_restore(store);
                     break;
+                #ifndef NDEBUG
                 case SDLK_1:
                     store->game.board[0][0] <<= 1;
                     break;
+                case SDLK_2:
+                    store->game.board[0][0] += 1;
+                    break;
+                #endif
                 case SDLK_PERIOD:
                     if (store->game.rows < DIM_MAX) {
                         ++store->game.rows;

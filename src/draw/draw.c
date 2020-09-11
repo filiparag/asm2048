@@ -46,6 +46,8 @@ SDL_Color color(const val value) {
     };
     if (value == 0)
         return colors[0];
+    else if (value == 1 || log2(value) + 0.5 >= log2(value) + 1)
+        return (SDL_Color) {113 + value % 71, 133 + value % 61, 153 + value % 51};
     else if (value <= 2048) {
         const val i = log2(value);
         return colors[i];
