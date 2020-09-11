@@ -31,13 +31,12 @@ bool window_init(window_store* store) {
 		return false;
 	}
     SDL_RenderClear(store->render);
-    draw_initialize(&store->draw, store->render, &store->game, &store->time);
-	font_open(&store->draw);
+    draw_initialize(&store->draw, store->render, &store->game, &store->control.mouse, &store->time);
 	if (TTF_Init() < 0) {
 		SDL_Quit();
 		return false;
 	}
-    game_initialize(&store->game, 4, 4);
+    game_initialize(&store->game, BOARD_DIM_X, BOARD_DIM_Y);
     time_initialize(&store->time);
     control_initialize(store);
     return true;
@@ -56,6 +55,6 @@ void window_close(window_store* store) {
     SDL_DestroyRenderer(store->render);
 	SDL_DestroyWindow(store->window);
 	SDL_Quit();
-	font_close(&store->draw);
+	draw_close(&store->draw);
 	atexit(TTF_Quit);
 }

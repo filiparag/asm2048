@@ -8,23 +8,30 @@
 
 #include "../game/game.h"
 #include "../window/time.h"
+#include "../window/controls.h"
 
 #define BOARD_SIZE 512
-#define HEADER_SIZE 128
+#define HEADER_SIZE 98
 #define BOARD_PADDING 24
-#define BOARD_DIM 4
+#define BOARD_DIM_X 4
+#define BOARD_DIM_Y 4
+#define BOARD_DIM (((BOARD_DIM_X)<(BOARD_DIM_Y))?(BOARD_DIM_X):(BOARD_DIM_Y))
 
 #define CELL_SIZE (BOARD_SIZE - BOARD_PADDING * (BOARD_DIM + 1)) / BOARD_DIM
 #define CELL_PADDING CELL_SIZE / 6
 #define CELL_BORDER_RAD 5
 
-#define BTN_PADDING 5
-#define BTN_BORDER_RAD 3
-#define BTN_COLOR_DELTA 30
-#define BTN_NAME_LENGTH 32
+#define BTN_COUNT 2
+#define BTN_SIZE 50
 
 #define FONT_NAME "assets/fonts/ClearSans-Medium.ttf"
 #define FONT_PT_SIZE 90
+
+#define IMAGE_NEW "assets/images/new.bmp"
+#define IMAGE_UNDO "assets/images/undo.bmp"
+#define IMAGE_SHARE "assets/images/share.bmp"
+
+#define COLOR_COUNT 11
 
 typedef int16_t pix;
 typedef uint8_t clr;
@@ -41,17 +48,32 @@ typedef struct {
   int width, height;
 } text_raster;
 
+typedef enum {
+    NEW = 0,
+    UNDO = 1,
+    SHARE = 2
+} button_name;
+
+typedef struct {
+    bool visible;
+    pix x, y, size;
+    SDL_Texture* image;
+} button;
 typedef struct {
     SDL_Renderer* render;
     TTF_Font* font;
     game_store* game;
+    input_pointer* mouse;
     time_store* time;
+    button buttons[BTN_COUNT];
 } draw_store;
 
+void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time);
+void draw_close(draw_store* store);
 void font_open(draw_store* store);
 void font_close(draw_store* store);
-
-void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, time_store* time);
+void image_load(draw_store* store);
+void image_unload(draw_store* store);
 void draw(draw_store* store);
 
 void color_add(SDL_Color *base, const SDL_Color delta);

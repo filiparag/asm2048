@@ -28,8 +28,7 @@ void dim_to_pix(const dim row, const dim col, pix *x, pix *y) {
 
 void pix_to_dim(const pix x, const pix y, dim *row, dim *col) {
     *row = (y - BOARD_PADDING) /
-               (BOARD_PADDING + CELL_SIZE) -
-           1;
+               (BOARD_PADDING + CELL_SIZE);
     *col = (x - BOARD_PADDING) /
            (BOARD_PADDING + CELL_SIZE);
 }
@@ -54,14 +53,11 @@ void color_sub(SDL_Color *base, const SDL_Color delta) {
 }
 
 void color_foreground(const SDL_Color bg, SDL_Color *fg) {
-    if (bg.r + bg.g + bg.b > 540)
-    {
+    if (bg.r + bg.g + bg.b > 540) {
         fg->r = 119;
         fg->g = 110;
         fg->b = 101;
-    }
-    else
-    {
+    } else {
         fg->r = 249;
         fg->g = 246;
         fg->b = 242;

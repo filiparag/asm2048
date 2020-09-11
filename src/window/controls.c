@@ -8,6 +8,8 @@ void control_initialize(window_store* store) {
         .lmb = false,
         .rmb = false
     };
+    store->control.undo_count = 0;
+    store->control.undo_current = 0;
 }
 
 bool control_read_events(window_store* store) {
@@ -23,6 +25,7 @@ bool control_read_events(window_store* store) {
                 break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
+                control_event_mouse(event, store);
                 break;
             default:
                 break;
@@ -38,19 +41,33 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
                 case SDLK_LEFT:
-                    game_make_move(&store->game, LEFT);
+                    control_undo_save(store);
+                    if (!game_make_move(&store->game, LEFT))
+                         control_undo_discard(store);
                     break;
                 case SDLK_RIGHT:
-                    game_make_move(&store->game, RIGHT);
+                    control_undo_save(store);
+                    if (!game_make_move(&store->game, RIGHT))
+                         control_undo_discard(store);
                     break;
                 case SDLK_UP:
-                    game_make_move(&store->game, UP);
+                    control_undo_save(store);
+                    if (!game_make_move(&store->game, UP))
+                         control_undo_discard(store);
                     break;
                 case SDLK_DOWN:
-                    game_make_move(&store->game, DOWN);
+                    control_undo_save(store);
+                    if (!game_make_move(&store->game, DOWN))
+                         control_undo_discard(store);
                     break;
                 case SDLK_n:
-                    game_initialize(&store->game, 4, 4);
+                    game_initialize(&store->game, store->game.rows, store->game.cols);
+                    store->control.undo_count = 0;
+                    store->control.undo_current = 0;
+                    store->draw.buttons[UNDO].visible = false;
+                    break;
+                case SDLK_u:
+                    control_undo_restore(store);
                     break;
                 case SDLK_q:
                     store->game.state = QUIT;
@@ -59,4 +76,68 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
             break;
     }
     return true;
+}
+
+bool control_event_mouse(const SDL_Event event, window_store* store) {
+    switch (event.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            switch (event.button.button) {
+                case SDL_BUTTON_LEFT:
+                    store->control.mouse.lmb = true;
+                    int x = store->control.mouse.x,
+                        y = store->control.mouse.y;
+                    if (y >= store->draw.buttons[0].y && y <= store->draw.buttons[0].y + store->draw.buttons[0].size) {
+                        if (x >= store->draw.buttons[NEW].x && x <= store->draw.buttons[NEW].x + store->draw.buttons[NEW].size) {
+                            game_initialize(&store->game, store->game.rows, store->game.cols);
+                            store->draw.buttons[UNDO].visible = false;
+                        }
+                        if (store->draw.buttons[UNDO].visible && x >= store->draw.buttons[UNDO].x && x <= store->draw.buttons[UNDO].x + store->draw.buttons[UNDO].size)
+                            control_undo_restore(store);
+                    }
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    store->control.mouse.rmb = true;
+                    break;
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            switch (event.button.button) {
+                case SDL_BUTTON_LEFT:
+                    store->control.mouse.lmb = false;
+                    break;
+                case SDL_BUTTON_RIGHT:
+                    store->control.mouse.rmb = false;
+                    break;
+            }
+            break;
+    }
+    return true;
+}
+
+void control_undo_save(window_store* store) {
+    memcpy(&store->control.undo[store->control.undo_current], &store->game, sizeof(store->game));
+    ++store->control.undo_current;
+    store->control.undo_current %= UNDO_BUFFER;
+    if (store->control.undo_count < UNDO_BUFFER)
+        ++store->control.undo_count;
+    store->draw.buttons[UNDO].visible = store->control.undo_count > 0;
+}
+
+void control_undo_discard(window_store* store) {
+    if (store->control.undo_count == 0)
+        return;
+    --store->control.undo_current;
+    store->control.undo_current %= UNDO_BUFFER;
+    --store->control.undo_count;
+    store->draw.buttons[UNDO].visible = store->control.undo_count > 0;
+}
+
+void control_undo_restore(window_store* store) {
+    if (store->control.undo_count == 0)
+        return;
+    --store->control.undo_current;
+    store->control.undo_current %= UNDO_BUFFER;
+    --store->control.undo_count;
+    memcpy(&store->game, &store->control.undo[store->control.undo_current], sizeof(store->game));
+    store->draw.buttons[UNDO].visible = store->control.undo_count > 0;
 }
