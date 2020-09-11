@@ -183,6 +183,7 @@ void game_initialize(game_store* store, const dim rows, const dim cols) {
 }
 
 bool game_make_move(game_store* store, const game_move move) {
+    bool moved = false;
     if (store->state != PLAYING && store->state != WON)
         return false;
     store->actions_count = 0;
@@ -190,25 +191,16 @@ bool game_make_move(game_store* store, const game_move move) {
     if (game_board_move(store, move, &cell_max)) {
         if (store->state != WON && cell_max >= WIN_CELL_MAX)
             store->state = WON;
-        if (!game_board_insert_random(store)) {
-            if (game_board_out_of_moves(store)) {
-                if (store->state == WON)
-                    store->state = WON_END;
-                else
-                    store->state = LOST;
-            }
-            return false;
-        }
-        return true;
-    } else {
-        if (game_board_out_of_moves(store)) {
-            if (store->state == WON)
-                store->state = WON_END;
-            else
-                store->state = LOST;
-        }
-        return false;
+        game_board_insert_random(store);
+        moved = true;
     }
+    if (game_board_out_of_moves(store)) {
+        if (store->state == WON)
+            store->state = WON_END;
+        else
+            store->state = LOST;
+    }
+    return moved;
 }
 
 void game_print(game_store* store) {
