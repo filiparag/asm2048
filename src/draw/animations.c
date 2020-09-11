@@ -16,12 +16,14 @@ void anim_append(draw_store* store) {
                 store->anim[store->anim_count].start_time += ANIMATION_TIME / 2;
                 store->anim[store->anim_count].end_time += ANIMATION_TIME;
                 store->board_delta[store->game->actions[i].row_target][store->game->actions[i].col_target] = 0;
+                ++store->anim_count;
                 break;
             case MOVE:
                 store->anim[store->anim_count].start_time += 0;
                 store->anim[store->anim_count].end_time += ANIMATION_TIME / 2;
                 store->board_delta[store->game->actions[i].row_el1][store->game->actions[i].col_el1] = 0;
                 store->board_delta[store->game->actions[i].row_target][store->game->actions[i].col_target] = 0;
+                ++store->anim_count;
                 break;
             case ADD:
                 store->anim[store->anim_count].start_time += 0;
@@ -29,9 +31,9 @@ void anim_append(draw_store* store) {
                 store->board_delta[store->game->actions[i].row_el1][store->game->actions[i].col_el1] = 0;
                 store->board_delta[store->game->actions[i].row_el2][store->game->actions[i].col_el2] = 0;
                 store->board_delta[store->game->actions[i].row_target][store->game->actions[i].col_target] = 0;
+                ++store->anim_count;
                 break;
         }
-        ++store->anim_count;
     }
     if (store->anim_count > 0)
         *store->controls = false;

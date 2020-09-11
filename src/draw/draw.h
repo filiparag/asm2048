@@ -33,7 +33,7 @@
 
 #define COLOR_COUNT 11
 
-#define ANIMATION_BUFER BOARD_DIM * 3
+#define ANIMATION_BUFER BOARD_DIM * BOARD_DIM * 3
 #define ANIMATION_TIME 400
 
 typedef int16_t pix;
