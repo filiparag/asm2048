@@ -1,19 +1,17 @@
 #include "./game.h"
+#include "./asm.h"
 
+#ifndef USE_ASM
 void game_board_clear(game_store* store) {
     for (dim i = 0; i < store->rows; ++i)
         for (dim j = 0; j < store->cols; ++j)
             store->board[i][j] = 0;
 }
-
-bool game_board_full(game_store* store) {
-    dim count = store->rows * store->cols;
-    for (dim i = 0; i < store->rows; ++i)
-        for (dim j = 0; j < store->cols; ++j)
-            if (store->board[i][j] > 0)
-                --count;
-    return !count;
+#else
+void game_board_clear(game_store* store) {
+    game_board_clear_asm(store->board, store->rows, store->cols);
 }
+#endif
 
 bool game_board_out_of_moves(game_store* store) {
     dim moves = 0;

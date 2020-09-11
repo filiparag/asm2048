@@ -7,7 +7,14 @@ project(asm2048)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 # Add all C source files under the src directory
-file(GLOB_RECURSE SOURCES "src/*.c")
+file(GLOB_RECURSE C_SOURCES "src/*.c")
+
+# Add all assembly source files under the src directory
+add_compile_definitions(USE_ASM true)
+enable_language(ASM)
+file(GLOB_RECURSE ASM_SOURCES "src/game/*.S")
+
+set(SOURCES ${C_SOURCES} ${ASM_SOURCES})
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Debug symbols
