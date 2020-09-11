@@ -26,6 +26,7 @@ void control_initialize(window_store* store);
 bool control_read_events(window_store* store);
 bool control_event_keyboard(const SDL_Event event, window_store* store);
 bool control_event_mouse(const SDL_Event event, window_store* store);
+bool control_event_window(const SDL_Event event, window_store* store);
 void control_undo_save(window_store* store);
 void control_undo_discard(window_store* store);
 void control_undo_restore(window_store* store);
