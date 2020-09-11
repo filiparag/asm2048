@@ -19,18 +19,18 @@ void color_add(SDL_Color *base, const SDL_Color delta) {
         base->a = UINT8_MAX;
 }
 
-void dim_to_pix(const dim row, const dim col, pix *x, pix *y) {
-    *x = BOARD_PADDING +
-         (BOARD_PADDING + CELL_SIZE) * col;
-    *y = HEADER_SIZE + BOARD_PADDING +
-         (BOARD_PADDING + CELL_SIZE) * row;
+void dim_to_pix(const dimensions* dims, const dim row, const dim col, pix *x, pix *y) {
+    *x = dims->board_padding +
+         (dims->board_padding + dims->cell_size) * col;
+    *y = dims->header_size + dims->board_padding +
+         (dims->board_padding + dims->cell_size) * row;
 }
 
-void pix_to_dim(const pix x, const pix y, dim *row, dim *col) {
-    *row = (y - BOARD_PADDING) /
-               (BOARD_PADDING + CELL_SIZE);
-    *col = (x - BOARD_PADDING) /
-           (BOARD_PADDING + CELL_SIZE);
+void pix_to_dim(const dimensions* dims, const pix x, const pix y, dim *row, dim *col) {
+    *row = (y - dims->board_padding) /
+               (dims->board_padding + dims->cell_size);
+    *col = (x - dims->board_padding) /
+           (dims->board_padding + dims->cell_size);
 }
 
 void color_sub(SDL_Color *base, const SDL_Color delta) {

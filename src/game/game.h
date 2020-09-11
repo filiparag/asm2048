@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 #define DIM_MIN 2
-#define DIM_MAX 16
+#define DIM_MAX 8
 
 #define INSERT_POW_MAX 2
 

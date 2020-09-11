@@ -31,12 +31,12 @@ bool window_init(window_store* store) {
 		return false;
 	}
     SDL_RenderClear(store->render);
+    game_initialize(&store->game, BOARD_DIM_X, BOARD_DIM_Y);
     draw_initialize(&store->draw, store->render, &store->game, &store->control.mouse, &store->time, &store->control.enabled);
 	if (TTF_Init() < 0) {
 		SDL_Quit();
 		return false;
 	}
-    game_initialize(&store->game, BOARD_DIM_X, BOARD_DIM_Y);
     time_initialize(&store->time);
     control_initialize(store);
 	anim_append(&store->draw);

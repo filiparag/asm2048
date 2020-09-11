@@ -18,15 +18,15 @@ void image_load(draw_store* store) {
     image = SDL_LoadBMP(IMAGE_UNDO);
     store->buttons[(button_name) UNDO].image = SDL_CreateTextureFromSurface(store->render, image);
     SDL_FreeSurface(image);
-    // image = SDL_LoadBMP(IMAGE_SHARE);
-    // store->buttons[(button_name) SHARE].image = SDL_CreateTextureFromSurface(store->render, image);
-    // SDL_FreeSurface(image);
+    image = SDL_LoadBMP(IMAGE_SIZE);
+    store->buttons[(button_name) SIZE].image = SDL_CreateTextureFromSurface(store->render, image);
+    SDL_FreeSurface(image);
 }
 
 void image_unload(draw_store* store) {
     SDL_DestroyTexture(store->buttons[(button_name) NEW].image);
     SDL_DestroyTexture(store->buttons[(button_name) UNDO].image);
-    // SDL_DestroyTexture(store->buttons[(button_name) SHARE].image);
+    SDL_DestroyTexture(store->buttons[(button_name) SIZE].image);
 }
 
 SDL_Color color(const val value) {
@@ -53,31 +53,60 @@ SDL_Color color(const val value) {
         return (SDL_Color) {71 + value % 113, 61 + value % 133, 51 + value % 153};
 }
 
+void draw_position_buttons(draw_store* store) {
+    store->buttons[UNDO] = (button) {
+        .visible = store->buttons[UNDO].visible,
+        .x = store->dim.board_size - 2 * store->dim.btn_size - store->dim.board_padding * 1.5,
+        .y = store->dim.header_size - store->dim.btn_size - store->dim.board_padding,
+        .size = store->dim.btn_size
+    };
+    store->buttons[NEW] = (button) {
+        .visible = store->buttons[NEW].visible,
+        .x = store->dim.board_size - store->dim.btn_size - store->dim.board_padding,
+        .y = store->dim.header_size - store->dim.btn_size - store->dim.board_padding,
+        .size = store->dim.btn_size
+    };
+    store->buttons[SIZE] = (button) {
+        .visible = store->buttons[SIZE].visible,
+        .x = store->dim.board_size - 2 * store->dim.btn_size - store->dim.board_padding * 1.5,
+        .y = store->dim.header_size - store->dim.btn_size - store->dim.board_padding,
+        .size = store->dim.btn_size
+    };
+}
+
+void draw_set_dimensions(draw_store* store, const pix width) {
+    store->dim.board_size = width;
+    store->dim.header_size = width / 5.22;
+    store->dim.board_padding = width / 21.3;
+    store->dim.board_dim_max = store->game->cols;
+    store->dim.cell_size = (
+        (store->dim.board_size - store->dim.board_padding * (store->dim.board_dim_max + 1)) / store->dim.board_dim_max
+    );
+    store->dim.cell_padding = store->dim.cell_size / 6;
+    store->dim.cell_border_rad = store->dim.cell_size / 19.6;
+    store->dim.btn_size = store->dim.board_size / 10.24;
+}
+
+void draw_rescale(draw_store* store, const pix width) {
+    draw_set_dimensions(store, width);
+    draw_position_buttons(store);
+    image_unload(store);
+    image_load(store);
+}
+
 void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time, bool* controls) {
     store->render = render;
     store->font = NULL;
-    font_open(store);
     store->game = game;
     store->mouse = mouse;
     store->time = time;
     store->controls = controls;
-    // store->buttons[SHARE] = (button) {
-    //     .x = BOARD_SIZE - 3 * BTN_SIZE - BOARD_PADDING - 2 * CELL_PADDING,
-    //     .y = HEADER_SIZE - 50 - BOARD_PADDING,
-    //     .size = 50
-    // };
-    store->buttons[UNDO] = (button) {
-        .visible = false,
-        .x = BOARD_SIZE - 2 * BTN_SIZE - BOARD_PADDING - CELL_PADDING,
-        .y = HEADER_SIZE - 50 - BOARD_PADDING,
-        .size = 50
-    };
-    store->buttons[NEW] = (button) {
-        .visible = true,
-        .x = BOARD_SIZE - BTN_SIZE - BOARD_PADDING,
-        .y = HEADER_SIZE - 50 - BOARD_PADDING,
-        .size = 50
-    };
+    store->buttons[NEW].visible = true;
+    store->buttons[SIZE].visible = true;
+    store->buttons[UNDO].visible = false;
+    draw_set_dimensions(store, BOARD_SIZE);
+    draw_position_buttons(store);
+    font_open(store);
     image_load(store);
     anim_initialize(store);
 }
@@ -99,7 +128,7 @@ void draw_rectangle(draw_store* store, const pix x, const pix y, const pix w, co
 void draw_background(draw_store* store) {
   SDL_SetRenderDrawColor(store->render, 250,248,239, 255);
   SDL_Rect board_rect = {
-		0, 0, BOARD_SIZE, HEADER_SIZE + BOARD_SIZE
+		0, 0, store->dim.board_size, store->dim.header_size + store->dim.board_size
 	};
   SDL_RenderFillRect(store->render, &board_rect);
 }
@@ -151,35 +180,36 @@ void draw_text(draw_store* store, const char text[],
 void draw_cell_text(draw_store* store, const char text[],
                     const pix x, const pix y, const pix size,
                     const pix padding, const SDL_Color bg) {
-  SDL_Color fg;
-  color_foreground(bg, &fg);
-  draw_text(
-    store, text, x + padding, y + padding,
-    size - 2 * padding,
-    size - 2 * padding,
-    fg, ALIGN_MIDDLE
-  );
+    SDL_Color fg;
+    color_foreground(bg, &fg);
+    draw_text(
+        store, text, x + padding, y + padding,
+        size - 2 * padding,
+        size - 2 * padding,
+        fg, ALIGN_MIDDLE
+    );
 }
 
 void draw_cell_box(draw_store* store, const SDL_Color color,
                    const pix x, const pix y, const pix size) {
-  roundedBoxRGBA(
-    store->render, x, y,
-    x + size, y + size,
-    CELL_BORDER_RAD,
-    color.r, color.g, color.b,
-    255
-  );
+    roundedBoxRGBA(
+        store->render, x, y,
+        x + size, y + size,
+        store->dim.cell_border_rad,
+        color.r, color.g, color.b,
+        255
+    );
 }
 
 void draw_cell_pix(draw_store* store, const val value, const pix x, const pix y, const double scale) {
     dim row, col;
-    pix_to_dim(x, y, &row, &col);
-    const pix size = CELL_SIZE * scale,
-                padding = CELL_PADDING * scale;
-    const double dsize = CELL_SIZE - CELL_SIZE * scale;
+    pix_to_dim(&store->dim, x, y, &row, &col);
+    const pix size = store->dim.cell_size * scale,
+              padding = store->dim.cell_padding * scale;
+    const double dsize = store->dim.cell_size - store->dim.cell_size * scale;
+
     const pix x_scaled = x + dsize / 2,
-                y_scaled = y + dsize / 2;
+              y_scaled = y + dsize / 2;
     draw_cell_box(
         store, color(value), x_scaled, y_scaled, size
     );
@@ -195,7 +225,7 @@ void draw_cell_pix(draw_store* store, const val value, const pix x, const pix y,
 
 void draw_cell_dim(draw_store* store, const val value, const dim row, const dim col, const double scale) {
     pix x, y;
-    dim_to_pix(row, col, &x, &y);
+    dim_to_pix(&store->dim, row, col, &x, &y);
     draw_cell_pix(store, value, x, y, scale);
 }
 
@@ -225,7 +255,7 @@ void draw_button(draw_store* store, const button_name btn) {
 
 void draw_cell(draw_store* store, const dim row, const dim col, const double scale) {
     pix x, y;
-    dim_to_pix(row, col, &x, &y);
+    dim_to_pix(&store->dim, row, col, &x, &y);
     val value;
     if (store->anim_count == 0)
         value = store->game->board[row][col];
@@ -236,17 +266,22 @@ void draw_cell(draw_store* store, const dim row, const dim col, const double sca
 
 void draw(draw_store* store) {
     draw_background(store);
-    draw_rectangle(store, 0, HEADER_SIZE, BOARD_SIZE, BOARD_SIZE, 0, (SDL_Color) {187,173,160});
-    for (dim i = 0; i < BOARD_DIM_X; ++i)
-         for (dim j = 0; j < BOARD_DIM_Y; ++j)
+    draw_rectangle(
+        store,
+        0, store->dim.header_size,
+        store->dim.board_size, store->dim.board_size,
+        0, (SDL_Color) {187,173,160}
+    );
+    for (dim i = 0; i < store->game->rows; ++i)
+         for (dim j = 0; j < store->game->cols; ++j)
             draw_cell(store, i, j, 1);
     anim_draw(store);
     static char score_string[48];
     sprintf(score_string, "Score: %u", store->game->score);
     draw_text(
-        store, score_string, BOARD_PADDING, BOARD_PADDING - 5,
-        BOARD_SIZE - 3 * BTN_SIZE - 2 * BOARD_PADDING - 2 * CELL_PADDING, 40,
-        (SDL_Color) {119, 110, 101}, ALIGN_LEFT
+        store, score_string, store->dim.board_padding, store->dim.board_padding - 5,
+        store->dim.board_size - 3 * store->dim.btn_size - 2 * store->dim.board_padding - 2 * store->dim.cell_padding,
+        store->dim.header_size / 2.45, (SDL_Color) {119, 110, 101}, ALIGN_LEFT
     );
     static char state_string[48];
     switch (store->game->state) {
@@ -266,9 +301,10 @@ void draw(draw_store* store) {
             break;
     }
     draw_text(
-        store, state_string, BOARD_PADDING, BOARD_PADDING + 33,
-        BOARD_SIZE - 3 * BTN_SIZE - 2 * BOARD_PADDING - 2 * CELL_PADDING, 22,
-        (SDL_Color) {119, 110, 101}, ALIGN_LEFT
+        store, state_string,
+        store->dim.board_padding, store->dim.board_padding + store->dim.header_size / 2.97,
+        store->dim.board_size - 3 * store->dim.btn_size - 2 * store->dim.board_padding - 2 * store->dim.cell_padding,
+        store->dim.header_size / 4.45, (SDL_Color) {119, 110, 101}, ALIGN_LEFT
     );
     SDL_Cursor* cursor;
     cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);

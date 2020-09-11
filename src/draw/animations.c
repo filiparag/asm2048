@@ -73,8 +73,8 @@ void anim_insert(draw_store* store, const dim i) {
 void anim_move(draw_store* store, const dim i) {
     game_action* action = &store->anim[i].action;
     pix xt, yt, x1, y1;
-    dim_to_pix(action->row_target, action->col_target, &xt, &yt);
-    dim_to_pix(action->row_el1, action->col_el1, &x1, &y1);
+    dim_to_pix(&store->dim, action->row_target, action->col_target, &xt, &yt);
+    dim_to_pix(&store->dim, action->row_el1, action->col_el1, &x1, &y1);
     double done = anim_done(store, i);
     pix x = x1 + (xt - x1) * done,
         y = y1 + (yt - y1) * done;
@@ -85,9 +85,9 @@ void anim_move(draw_store* store, const dim i) {
 void anim_add(draw_store* store, const dim i) {
     game_action* action = &store->anim[i].action;
     pix xt, yt, x1, y1, x2, y2;
-    dim_to_pix(action->row_target, action->col_target, &xt, &yt);
-    dim_to_pix(action->row_el1, action->col_el1, &x1, &y1);
-    dim_to_pix(action->row_el2, action->col_el2, &x2, &y2);
+    dim_to_pix(&store->dim, action->row_target, action->col_target, &xt, &yt);
+    dim_to_pix(&store->dim, action->row_el1, action->col_el1, &x1, &y1);
+    dim_to_pix(&store->dim, action->row_el2, action->col_el2, &x2, &y2);
     double done = anim_done(store, i);
     pix xp1 = x1 + (xt - x1) * done * 2,
         yp1 = y1 + (yt - y1) * done * 2,

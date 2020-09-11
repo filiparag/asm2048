@@ -46,30 +46,39 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
             switch (event.key.keysym.sym) {
                 case SDLK_LEFT:
                     control_undo_save(store);
-                    if (game_make_move(&store->game, LEFT))
+                    if (game_make_move(&store->game, LEFT)) {
                         anim_append(&store->draw);
+                        store->draw.buttons[NEW].visible = true;
+                        store->draw.buttons[SIZE].visible = false;
+                    }
                     else
                         control_undo_discard(store);
                     break;
                 case SDLK_RIGHT:
                     control_undo_save(store);
-                    if (game_make_move(&store->game, RIGHT))
+                    if (game_make_move(&store->game, RIGHT)) {
                         anim_append(&store->draw);
-                    else
+                        store->draw.buttons[NEW].visible = true;
+                        store->draw.buttons[SIZE].visible = false;
+                    } else
                         control_undo_discard(store);
                     break;
                 case SDLK_UP:
                     control_undo_save(store);
-                    if (game_make_move(&store->game, UP))
+                    if (game_make_move(&store->game, UP)) {
                         anim_append(&store->draw);
-                    else
+                        store->draw.buttons[NEW].visible = true;
+                        store->draw.buttons[SIZE].visible = false;
+                    } else
                         control_undo_discard(store);
                     break;
                 case SDLK_DOWN:
                     control_undo_save(store);
-                    if (game_make_move(&store->game, DOWN))
+                    if (game_make_move(&store->game, DOWN)) {
                         anim_append(&store->draw);
-                    else
+                        store->draw.buttons[NEW].visible = true;
+                        store->draw.buttons[SIZE].visible = false;
+                    } else
                         control_undo_discard(store);
                     break;
                 case SDLK_n:
@@ -78,12 +87,52 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                     store->control.undo_count = 0;
                     store->control.undo_current = 0;
                     store->draw.buttons[UNDO].visible = false;
+                    store->draw.buttons[NEW].visible = false;
+                    store->draw.buttons[SIZE].visible = true;
                     break;
                 case SDLK_u:
                     control_undo_restore(store);
                     break;
-                 case SDLK_1:
+                case SDLK_1:
                     store->game.board[0][0] <<= 1;
+                    break;
+                case SDLK_PERIOD:
+                    if (store->game.rows < DIM_MAX) {
+                        ++store->game.rows;
+                        ++store->game.cols;
+                    }
+                    game_initialize(&store->game, store->game.rows, store->game.cols);
+                    draw_set_dimensions(&store->draw, store->draw.dim.board_size);
+                    anim_append(&store->draw);
+                    store->draw.buttons[UNDO].visible = false;
+                    store->draw.buttons[SIZE].visible = true;
+                    break;
+                case SDLK_COMMA:
+                    if (store->game.rows > DIM_MIN) {
+                        --store->game.rows;
+                        --store->game.cols;
+                    }
+                    game_initialize(&store->game, store->game.rows, store->game.cols);
+                    draw_set_dimensions(&store->draw, store->draw.dim.board_size);
+                    anim_append(&store->draw);
+                    store->draw.buttons[UNDO].visible = false;
+                    store->draw.buttons[SIZE].visible = true;
+                    break;
+                case SDLK_a:
+                    draw_rescale(&store->draw, store->draw.dim.board_size * 1.1);
+                    SDL_SetWindowSize(
+                        store->window,
+                        store->draw.dim.board_size,
+                        store->draw.dim.header_size + store->draw.dim.board_size
+                    );
+                    break;
+                case SDLK_z:
+                    draw_rescale(&store->draw, store->draw.dim.board_size * 0.9);
+                    SDL_SetWindowSize(
+                        store->window,
+                        store->draw.dim.board_size,
+                        store->draw.dim.header_size + store->draw.dim.board_size
+                    );
                     break;
                 case SDLK_q:
                     store->game.state = QUIT;
@@ -103,10 +152,26 @@ bool control_event_mouse(const SDL_Event event, window_store* store) {
                     int x = store->control.mouse.x,
                         y = store->control.mouse.y;
                     if (y >= store->draw.buttons[0].y && y <= store->draw.buttons[0].y + store->draw.buttons[0].size) {
-                        if (x >= store->draw.buttons[NEW].x && x <= store->draw.buttons[NEW].x + store->draw.buttons[NEW].size) {
+                        if (store->draw.buttons[NEW].visible && x >= store->draw.buttons[NEW].x && x <= store->draw.buttons[NEW].x + store->draw.buttons[NEW].size) {
                             game_initialize(&store->game, store->game.rows, store->game.cols);
                             anim_append(&store->draw);
                             store->draw.buttons[UNDO].visible = false;
+                            store->draw.buttons[NEW].visible = true;
+                            store->draw.buttons[SIZE].visible = true;
+                        }
+                        if (store->draw.buttons[SIZE].visible && x >= store->draw.buttons[SIZE].x && x <= store->draw.buttons[SIZE].x + store->draw.buttons[SIZE].size) {
+                            if (store->game.rows < DIM_MAX) {
+                                ++store->game.rows;
+                                ++store->game.cols;
+                            } else {
+                                store->game.rows = DIM_MIN;
+                                store->game.cols = DIM_MIN;
+                            }
+                            game_initialize(&store->game, store->game.rows, store->game.cols);
+                            draw_set_dimensions(&store->draw, store->draw.dim.board_size);
+                            anim_append(&store->draw);
+                            store->draw.buttons[UNDO].visible = false;
+                            store->draw.buttons[SIZE].visible = true;
                         }
                         if (store->draw.buttons[UNDO].visible && x >= store->draw.buttons[UNDO].x && x <= store->draw.buttons[UNDO].x + store->draw.buttons[UNDO].size)
                             control_undo_restore(store);
