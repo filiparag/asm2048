@@ -33,6 +33,8 @@
 
 #define COLOR_COUNT 11
 
+#define ANIMATION_BUFER BOARD_DIM * 3
+
 typedef int16_t pix;
 typedef uint8_t clr;
 
@@ -59,6 +61,13 @@ typedef struct {
     pix x, y, size;
     SDL_Texture* image;
 } button;
+
+typedef struct {
+    double start_time;
+    double end_time;
+    game_action action;
+} animation_action;
+
 typedef struct {
     SDL_Renderer* render;
     TTF_Font* font;
@@ -66,6 +75,9 @@ typedef struct {
     input_pointer* mouse;
     time_store* time;
     button buttons[BTN_COUNT];
+    animation_action anim[ANIMATION_BUFER];
+    uint16_t anim_count;
+    game_board board_delta;
 } draw_store;
 
 void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time);
@@ -75,6 +87,13 @@ void font_close(draw_store* store);
 void image_load(draw_store* store);
 void image_unload(draw_store* store);
 void draw(draw_store* store);
+void draw_cell_pix(draw_store* store, const val value, const pix x, const pix y, const double scale);
+void draw_cell_dim(draw_store* store, const val value, const dim row, const dim col, const double scale);
+void draw_cell(draw_store* store, const dim row, const dim col, const double scale);
+
+void anim_initialize(draw_store* store);
+void anim_append(draw_store* store);
+void anim_draw(draw_store* store);
 
 void color_add(SDL_Color *base, const SDL_Color delta);
 void dim_to_pix(const dim row, const dim col, pix *x, pix *y);

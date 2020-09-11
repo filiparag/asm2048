@@ -42,23 +42,31 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
             switch (event.key.keysym.sym) {
                 case SDLK_LEFT:
                     control_undo_save(store);
-                    if (!game_make_move(&store->game, LEFT))
-                         control_undo_discard(store);
+                    if (game_make_move(&store->game, LEFT))
+                        anim_append(&store->draw);
+                    else
+                        control_undo_discard(store);
                     break;
                 case SDLK_RIGHT:
                     control_undo_save(store);
-                    if (!game_make_move(&store->game, RIGHT))
-                         control_undo_discard(store);
+                    if (game_make_move(&store->game, RIGHT))
+                        anim_append(&store->draw);
+                    else
+                        control_undo_discard(store);
                     break;
                 case SDLK_UP:
                     control_undo_save(store);
-                    if (!game_make_move(&store->game, UP))
-                         control_undo_discard(store);
+                    if (game_make_move(&store->game, UP))
+                        anim_append(&store->draw);
+                    else
+                        control_undo_discard(store);
                     break;
                 case SDLK_DOWN:
                     control_undo_save(store);
-                    if (!game_make_move(&store->game, DOWN))
-                         control_undo_discard(store);
+                    if (game_make_move(&store->game, DOWN))
+                        anim_append(&store->draw);
+                    else
+                        control_undo_discard(store);
                     break;
                 case SDLK_n:
                     game_initialize(&store->game, store->game.rows, store->game.cols);

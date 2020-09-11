@@ -78,6 +78,7 @@ void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, 
         .size = 50
     };
     image_load(store);
+    anim_initialize(store);
 }
 
 void draw_close(draw_store* store) {
@@ -170,10 +171,9 @@ void draw_cell_box(draw_store* store, const SDL_Color color,
   );
 }
 
-void draw_cell_pix(draw_store* store, const pix x, const pix y, const double scale) {
+void draw_cell_pix(draw_store* store, const val value, const pix x, const pix y, const double scale) {
     dim row, col;
     pix_to_dim(x, y, &row, &col);
-    val value = store->game->board[row][col];
     const pix size = CELL_SIZE * scale,
                 padding = CELL_PADDING * scale;
     const double dsize = CELL_SIZE - CELL_SIZE * scale;
@@ -190,6 +190,12 @@ void draw_cell_pix(draw_store* store, const pix x, const pix y, const double sca
             size, padding, color(value)
         );
     }
+}
+
+void draw_cell_dim(draw_store* store, const val value, const dim row, const dim col, const double scale) {
+    pix x, y;
+    dim_to_pix(row, col, &x, &y);
+    draw_cell_pix(store, value, x, y, scale);
 }
 
 void draw_button(draw_store* store, const button_name btn) {
@@ -219,17 +225,23 @@ void draw_button(draw_store* store, const button_name btn) {
 void draw_cell(draw_store* store, const dim row, const dim col, const double scale) {
     pix x, y;
     dim_to_pix(row, col, &x, &y);
-    draw_cell_pix(store, x, y, scale);
+    val value;
+    if (store->anim_count == 0)
+        value = store->game->board[row][col];
+    else
+        value = store->board_delta[row][col];
+    draw_cell_pix(store, value, x, y, scale);
 }
 
 void draw(draw_store* store) {
     draw_background(store);
     draw_rectangle(store, 0, HEADER_SIZE, BOARD_SIZE, BOARD_SIZE, 0, (SDL_Color) {187,173,160});
-    for (dim i = 0; i < BOARD_DIM; ++i)
-         for (dim j = 0; j < BOARD_DIM; ++j)
+    for (dim i = 0; i < BOARD_DIM_X; ++i)
+         for (dim j = 0; j < BOARD_DIM_Y; ++j)
             draw_cell(store, i, j, 1);
+    anim_draw(store);
     static char score_string[48];
-    sprintf(score_string, "Score: %u", store->game->score);
+    sprintf(score_string, "Score: %u, Anim: %u", store->game->score, store->anim_count);
     draw_text(
         store, score_string, BOARD_PADDING, BOARD_PADDING - 5,
         BOARD_SIZE - 3 * BTN_SIZE - 2 * BOARD_PADDING - 2 * CELL_PADDING, 40,

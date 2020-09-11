@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 typedef struct {
-    uint32_t last_frame;
-    uint32_t current_frame;
-    uint32_t delta;
-    double frame_time;
+    double last_time;
+    double current_time;
+    double delta_time;
+    uint16_t fps;
 } time_store;
 
 void time_initialize(time_store* store);
