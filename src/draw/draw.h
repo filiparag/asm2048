@@ -73,7 +73,8 @@ typedef struct {
   pix board_size, header_size,
       board_padding, board_dim_max,
       cell_size, cell_padding,
-      cell_border_rad, btn_size;
+      cell_border_rad, btn_size,
+      font_size;
 } dimensions;
 
 typedef struct {

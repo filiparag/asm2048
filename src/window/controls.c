@@ -86,6 +86,7 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                     break;
                 case SDLK_n:
                     game_initialize(&store->game, store->game.rows, store->game.cols);
+                    store->game.victory = pow(store->game.base, 3 * store->game.rows - 1);
                     anim_append(&store->draw);
                     store->control.undo_count = 0;
                     store->control.undo_current = 0;
@@ -108,27 +109,29 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                     if (store->game.rows < DIM_MAX) {
                         ++store->game.rows;
                         ++store->game.cols;
+                        game_initialize(&store->game, store->game.rows, store->game.cols);
+                        store->game.victory = pow(store->game.base, 3 * store->game.rows - 1);
+                        draw_set_dimensions(&store->draw, store->draw.dim.board_size);
+                        anim_append(&store->draw);
+                        store->control.undo_count = 0;
+                        store->control.undo_current = 0;
+                        store->draw.buttons[UNDO].visible = false;
+                        store->draw.buttons[SIZE].visible = true;
                     }
-                    game_initialize(&store->game, store->game.rows, store->game.cols);
-                    draw_set_dimensions(&store->draw, store->draw.dim.board_size);
-                    anim_append(&store->draw);
-                    store->control.undo_count = 0;
-                    store->control.undo_current = 0;
-                    store->draw.buttons[UNDO].visible = false;
-                    store->draw.buttons[SIZE].visible = true;
                     break;
                 case SDLK_COMMA:
                     if (store->game.rows > DIM_MIN) {
                         --store->game.rows;
                         --store->game.cols;
+                        game_initialize(&store->game, store->game.rows, store->game.cols);
+                        store->game.victory = pow(store->game.base, 3 * store->game.rows - 1);
+                        draw_set_dimensions(&store->draw, store->draw.dim.board_size);
+                        anim_append(&store->draw);
+                        store->control.undo_count = 0;
+                        store->control.undo_current = 0;
+                        store->draw.buttons[UNDO].visible = false;
+                        store->draw.buttons[SIZE].visible = true;
                     }
-                    game_initialize(&store->game, store->game.rows, store->game.cols);
-                    draw_set_dimensions(&store->draw, store->draw.dim.board_size);
-                    anim_append(&store->draw);
-                    store->control.undo_count = 0;
-                    store->control.undo_current = 0;
-                    store->draw.buttons[UNDO].visible = false;
-                    store->draw.buttons[SIZE].visible = true;
                     break;
                 case SDLK_a:
                     draw_rescale(&store->draw, store->draw.dim.board_size * 1.1);
@@ -166,6 +169,7 @@ bool control_event_mouse(const SDL_Event event, window_store* store) {
                     if (y >= store->draw.buttons[0].y && y <= store->draw.buttons[0].y + store->draw.buttons[0].size) {
                         if (store->draw.buttons[NEW].visible && x >= store->draw.buttons[NEW].x && x <= store->draw.buttons[NEW].x + store->draw.buttons[NEW].size) {
                             game_initialize(&store->game, store->game.rows, store->game.cols);
+                            store->game.victory = pow(store->game.base, 3 * store->game.rows - 1);
                             anim_append(&store->draw);
                             store->control.undo_count = 0;
                             store->control.undo_current = 0;
@@ -182,6 +186,7 @@ bool control_event_mouse(const SDL_Event event, window_store* store) {
                                 store->game.cols = DIM_MIN;
                             }
                             game_initialize(&store->game, store->game.rows, store->game.cols);
+                            store->game.victory = pow(store->game.base, 3 * store->game.rows - 1);
                             draw_set_dimensions(&store->draw, store->draw.dim.board_size);
                             anim_append(&store->draw);
                             store->control.undo_count = 0;

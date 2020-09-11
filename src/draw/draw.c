@@ -2,7 +2,7 @@
 
 void font_open(draw_store* store) {
     if (store->font == NULL)
-        store->font = TTF_OpenFont(FONT_NAME, FONT_PT_SIZE);
+        store->font = TTF_OpenFont(FONT_NAME, store->dim.font_size);
 }
 
 void font_close(draw_store* store) {
@@ -82,11 +82,12 @@ void draw_set_dimensions(draw_store* store, const pix width) {
     store->dim.board_padding = width / 21.3;
     store->dim.board_dim_max = store->game->cols;
     store->dim.cell_size = (
-        (store->dim.board_size - store->dim.board_padding * (store->dim.board_dim_max + 1)) / store->dim.board_dim_max
+        (width - store->dim.board_padding * (store->dim.board_dim_max + 1)) / store->dim.board_dim_max
     );
     store->dim.cell_padding = store->dim.cell_size / 6;
     store->dim.cell_border_rad = store->dim.cell_size / 19.6;
-    store->dim.btn_size = store->dim.board_size / 10.24;
+    store->dim.btn_size = width / 10.24;
+    store->dim.font_size = width / 5.69;
 }
 
 void draw_rescale(draw_store* store, const pix width) {
@@ -288,10 +289,10 @@ void draw(draw_store* store) {
     static char state_string[48];
     switch (store->game->state) {
         case PLAYING:
-            sprintf(state_string, "Playing 2048");
+            sprintf(state_string, "Playing %i", store->game->victory);
             break;
         case WON:
-            sprintf(state_string, "Winning 2048");
+            sprintf(state_string, "Winning %i", store->game->victory);
             break;
         case LOST:
             sprintf(state_string, "You lost!");
