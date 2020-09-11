@@ -19,7 +19,7 @@ set(CMAKE_BUILD_TYPE Debug)
 target_compile_options(${PROJECT_NAME} PRIVATE 
   -std=c18 -Wall -pedantic -Werror -Wshadow 
   -Wstrict-aliasing -Wstrict-overflow
-  -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function
+  # -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function
 )
 
 # Add SDL2 library

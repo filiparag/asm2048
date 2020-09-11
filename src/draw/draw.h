@@ -34,6 +34,7 @@
 #define COLOR_COUNT 11
 
 #define ANIMATION_BUFER BOARD_DIM * 3
+#define ANIMATION_TIME 400
 
 typedef int16_t pix;
 typedef uint8_t clr;
@@ -74,13 +75,14 @@ typedef struct {
     game_store* game;
     input_pointer* mouse;
     time_store* time;
+    bool* controls;
     button buttons[BTN_COUNT];
     animation_action anim[ANIMATION_BUFER];
     uint16_t anim_count;
     game_board board_delta;
 } draw_store;
 
-void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time);
+void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time, bool* controls);
 void draw_close(draw_store* store);
 void font_open(draw_store* store);
 void font_close(draw_store* store);

@@ -1,5 +1,7 @@
 # Low level 2048 game implementation with SDL2
 
+[![Demo](./demo.png)](./demo.webm)
+
 ## Prerequisites
 
 Build tools:

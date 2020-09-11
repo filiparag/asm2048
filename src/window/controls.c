@@ -13,19 +13,23 @@ void control_initialize(window_store* store) {
 }
 
 bool control_read_events(window_store* store) {
-    if (!store->control.enabled)
-        return false;
+    // if (!store->control.enabled)
+    //     return false;
     SDL_GetMouseState(&store->control.mouse.x, &store->control.mouse.y);
     SDL_Event event;
     if (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_KEYDOWN:
+                store->draw.anim_count = 0;
             case SDL_KEYUP:
                 control_event_keyboard(event, store);
                 break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 control_event_mouse(event, store);
+                break;
+            case SDL_QUIT:
+                store->game.state = QUIT;
                 break;
             default:
                 break;
@@ -70,6 +74,7 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                     break;
                 case SDLK_n:
                     game_initialize(&store->game, store->game.rows, store->game.cols);
+                    anim_append(&store->draw);
                     store->control.undo_count = 0;
                     store->control.undo_current = 0;
                     store->draw.buttons[UNDO].visible = false;
@@ -100,6 +105,7 @@ bool control_event_mouse(const SDL_Event event, window_store* store) {
                     if (y >= store->draw.buttons[0].y && y <= store->draw.buttons[0].y + store->draw.buttons[0].size) {
                         if (x >= store->draw.buttons[NEW].x && x <= store->draw.buttons[NEW].x + store->draw.buttons[NEW].size) {
                             game_initialize(&store->game, store->game.rows, store->game.cols);
+                            anim_append(&store->draw);
                             store->draw.buttons[UNDO].visible = false;
                         }
                         if (store->draw.buttons[UNDO].visible && x >= store->draw.buttons[UNDO].x && x <= store->draw.buttons[UNDO].x + store->draw.buttons[UNDO].size)

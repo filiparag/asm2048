@@ -7,8 +7,8 @@ bool window_init(window_store* store) {
 	}
 	store->window = SDL_CreateWindow(
 		"asm2048",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOW_VULKAN,
+		SDL_WINDOW_VULKAN,
 		BOARD_SIZE,
 		BOARD_SIZE + HEADER_SIZE,
 		SDL_WINDOW_SHOWN
@@ -31,7 +31,7 @@ bool window_init(window_store* store) {
 		return false;
 	}
     SDL_RenderClear(store->render);
-    draw_initialize(&store->draw, store->render, &store->game, &store->control.mouse, &store->time);
+    draw_initialize(&store->draw, store->render, &store->game, &store->control.mouse, &store->time, &store->control.enabled);
 	if (TTF_Init() < 0) {
 		SDL_Quit();
 		return false;
@@ -39,6 +39,7 @@ bool window_init(window_store* store) {
     game_initialize(&store->game, BOARD_DIM_X, BOARD_DIM_Y);
     time_initialize(&store->time);
     control_initialize(store);
+	anim_append(&store->draw);
     return true;
 }
 

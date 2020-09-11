@@ -140,7 +140,7 @@ bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim
 
 bool game_board_move(game_store* store, const game_move move, val* cell_max) {
     bool moved = false;
-    board_move m;
+    board_move m = {0};
     game_board_move_direction(move, store->rows, store->cols, &m);
     for(dim i = m.row_start; i != m.row_end; i += m.row_inc)
         for(dim j = m.col_start; j != m.col_end; j += m.col_inc) {

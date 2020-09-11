@@ -53,13 +53,14 @@ SDL_Color color(const val value) {
         return (SDL_Color) {71 + value % 113, 61 + value % 133, 51 + value % 153};
 }
 
-void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time) {
+void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time, bool* controls) {
     store->render = render;
     store->font = NULL;
     font_open(store);
     store->game = game;
     store->mouse = mouse;
     store->time = time;
+    store->controls = controls;
     // store->buttons[SHARE] = (button) {
     //     .x = BOARD_SIZE - 3 * BTN_SIZE - BOARD_PADDING - 2 * CELL_PADDING,
     //     .y = HEADER_SIZE - 50 - BOARD_PADDING,
@@ -183,7 +184,7 @@ void draw_cell_pix(draw_store* store, const val value, const pix x, const pix y,
         store, color(value), x_scaled, y_scaled, size
     );
     if (value != 0) {
-        static char cell_value_string[10];
+        static char cell_value_string[12];
         sprintf(cell_value_string, "%u", value);
         draw_cell_text(
             store, cell_value_string, x_scaled, y_scaled,
@@ -241,7 +242,7 @@ void draw(draw_store* store) {
             draw_cell(store, i, j, 1);
     anim_draw(store);
     static char score_string[48];
-    sprintf(score_string, "Score: %u, Anim: %u", store->game->score, store->anim_count);
+    sprintf(score_string, "Score: %u", store->game->score);
     draw_text(
         store, score_string, BOARD_PADDING, BOARD_PADDING - 5,
         BOARD_SIZE - 3 * BTN_SIZE - 2 * BOARD_PADDING - 2 * CELL_PADDING, 40,
