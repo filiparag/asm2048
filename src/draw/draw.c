@@ -50,7 +50,7 @@ SDL_Color color(const val value) {
         const val i = log2(value);
         return colors[i];
     } else
-        return (SDL_Color) {0, 0, 0};
+        return (SDL_Color) {71 + value % 113, 61 + value % 133, 51 + value % 153};
 }
 
 void draw_initialize(draw_store* store, SDL_Renderer* render, game_store* game, input_pointer* mouse, time_store* time) {

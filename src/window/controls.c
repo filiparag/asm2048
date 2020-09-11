@@ -69,6 +69,9 @@ bool control_event_keyboard(const SDL_Event event, window_store* store) {
                 case SDLK_u:
                     control_undo_restore(store);
                     break;
+                 case SDLK_1:
+                    store->game.board[0][0] <<= 1;
+                    break;
                 case SDLK_q:
                     store->game.state = QUIT;
                     break;

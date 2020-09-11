@@ -10,7 +10,7 @@
 
 #define INSERT_POW_MAX 2
 
-#define WIN_SCORE 2048
+#define WIN_CELL_MAX 2048
 
 #define START_CELLS_MIN 2
 #define START_CELLS_MAX 2
@@ -74,7 +74,7 @@ void board_action_add(game_store* store, const val value, const dim rt, const di
 bool game_board_insert_random(game_store* store);
 void game_board_move_direction(const game_move move, const dim rows, const dim cols, board_move* m);
 bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim* j);
-bool game_board_move(game_store* store, const game_move move);
+bool game_board_move(game_store* store, const game_move move, val* cell_max);
 void game_initialize(game_store* store, const dim rows, const dim cols);
 bool game_make_move(game_store* store, const game_move move);
 void game_print(game_store* store);

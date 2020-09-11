@@ -138,7 +138,7 @@ bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim
     return true;
 }
 
-bool game_board_move(game_store* store, const game_move move) {
+bool game_board_move(game_store* store, const game_move move, val* cell_max) {
     bool moved = false;
     board_move m;
     game_board_move_direction(move, store->rows, store->cols, &m);
@@ -156,6 +156,8 @@ bool game_board_move(game_store* store, const game_move move) {
                 store->board[i][j] = new_value;
                 store->score += new_value;
                 moved = true;
+                if (new_value > *cell_max)
+                    *cell_max = new_value;
                 board_action_add(store, store->board[i][j]/2, i, j, i1, j1, i2, j2);
             } else if ((i1 != i || j1 != j) && store->board[i1][j1] != 0) {
                 store->board[i][j] = store->board[i1][j1];
@@ -184,8 +186,9 @@ bool game_make_move(game_store* store, const game_move move) {
     if (store->state != PLAYING && store->state != WON)
         return false;
     store->actions_count = 0;
-    if (game_board_move(store, move)) {
-        if (store->state != WON && store->score >= WIN_SCORE)
+    val cell_max = 0;
+    if (game_board_move(store, move, &cell_max)) {
+        if (store->state != WON && cell_max >= WIN_CELL_MAX)
             store->state = WON;
         if (!game_board_insert_random(store)) {
             if (game_board_out_of_moves(store)) {
