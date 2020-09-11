@@ -18,9 +18,11 @@ int main(int argc, char *argv[]) {
 
 	while (store.game.state != QUIT) {
 		window_new_frame(&store);
+		#ifndef NDEBUG
 		system("clear");
 		printf("FPS:   %u\n", store.time.fps);
 		game_print(&store.game);
+		#endif
 	}
 
 	window_close(&store);
