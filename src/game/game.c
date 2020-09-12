@@ -13,6 +13,7 @@ void game_board_clear(game_store* store) {
 }
 #endif
 
+#ifndef USE_ASM
 bool game_board_out_of_moves(game_store* store) {
     dim moves = 0;
     for (dim i = 0; i < store->rows; ++i)
@@ -26,6 +27,11 @@ bool game_board_out_of_moves(game_store* store) {
         }
     return moves == 0;
 }
+#else
+bool game_board_out_of_moves(game_store* store) {
+    return game_board_out_of_moves_asm(store->board, store->rows, store->cols);
+}
+#endif
 
 void game_action_add(game_store* store, const board_action_type action, const val value, const dim rt, const dim ct, const dim r1, const dim c1, const dim r2, const dim c2) {
     store->actions[store->actions_count] = (game_action) {
