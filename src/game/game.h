@@ -16,10 +16,10 @@ typedef enum {
 } game_state;
 
 typedef enum {
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN
+    LEFT = 0,
+    RIGHT = 1,
+    UP = 2,
+    DOWN = 3
 } game_move;
 
 typedef uint32_t val;

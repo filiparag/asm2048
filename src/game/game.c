@@ -122,6 +122,7 @@ void game_board_move_direction(const game_move move, const dim rows, const dim c
     }
 }
 
+#ifndef USE_ASM
 bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim* j) {
     switch (move) {
         case LEFT:
@@ -141,6 +142,11 @@ bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim
     }
     return true;
 }
+#else
+bool game_board_move_next(const game_move move, const board_move* m, dim* i, dim* j) {
+    return game_board_move_next_asm(move, m, i, j);
+}
+#endif
 
 bool game_board_move(game_store* store, const game_move move, val* cell_max) {
     bool moved = false;
