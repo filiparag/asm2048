@@ -1,4 +1,4 @@
-#include "./constants.h"
+#include "../constants.h"
 
 .global game_board_out_of_moves_asm
 

@@ -1,4 +1,4 @@
-#inblude "./constants.h"
+#include "../constants.h"
 
 .global game_board_move_next_asm
 

@@ -1,5 +1,5 @@
 #include "./game.h"
-#include "./asm.h"
+#include "./x86_64/asm.h"
 
 #ifndef USE_ASM
 void game_board_clear(game_store* store) {
