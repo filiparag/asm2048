@@ -10,9 +10,12 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 file(GLOB_RECURSE C_SOURCES "src/*.c")
 
 # Add all assembly source files under the src directory
-add_compile_definitions(USE_ASM true)
-enable_language(ASM)
-file(GLOB_RECURSE ASM_SOURCES "src/game/*.S")
+option(USE_ASM "Use functions written in x86_64 assembly" ON)
+if(USE_ASM)
+  enable_language(ASM)
+  add_compile_definitions(USE_ASM true)
+  file(GLOB_RECURSE ASM_SOURCES "src/game/*.S")
+endif(USE_ASM)
 
 set(SOURCES ${C_SOURCES} ${ASM_SOURCES})
 add_executable(${PROJECT_NAME} ${SOURCES})
