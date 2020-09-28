@@ -1,6 +1,6 @@
 # Low level 2048 game implementation with SDL2
 
-[![Demo](./demo.png)](./demo.webm)
+![Demo](./demo.gif)
 
 ## Try it out
 
