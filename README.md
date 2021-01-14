@@ -4,6 +4,12 @@
 
 ## Try it out
 
+### Install on Arch Linux ([AUR](https://aur.archlinux.org/packages/2048-gui-git/))
+
+```sh
+yay -S 2048-gui-git
+```
+
 ### Prerequisites
 
 Build tools:
